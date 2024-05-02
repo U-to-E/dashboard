@@ -1,8 +1,10 @@
 package models
 
+import "gorm.io/gorm"
+
 type Student struct {
-	ID       uint `gorm:"primaryKey"`
-	Name     string
-	Email    string
-	Password []byte
+	gorm.Model
+	Username string `gorm:"uniqueIndex;not null" json:"username"`
+	Email    string `gorm:"uniqueIndex;not null" json:"email"`
+	Password string `gorm:"not null" json:"password"`
 }

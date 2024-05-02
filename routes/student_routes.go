@@ -1,7 +1,10 @@
 package routes
 
-import "github.com/gofiber/fiber/v3"
+import (
+	"github.com/U-to-E/dashboard/controller"
+	"github.com/gofiber/fiber/v3"
+)
 
-func setup_student_routes(app *fiber.App) {
-
+func SetupStudentRoutes(app *fiber.App) {
+	app.Get("/", controller.RenderLogin)
 }

@@ -1,6 +1,9 @@
 package database
 
 import (
+	"fmt"
+
+	"github.com/U-to-E/dashboard/config"
 	"github.com/U-to-E/dashboard/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -9,7 +12,7 @@ import (
 var DB *gorm.DB
 
 func Connect() {
-	con := "host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"
+	con := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", config.Config("DB_HOST"), config.Config("DB_USER"), config.Config("DB_PASSWORD"), config.Config("DB_NAME"), config.Config("DB_PORT"))
 	db, err := gorm.Open(postgres.Open(con), &gorm.Config{})
 
 	if err != nil {
@@ -18,6 +21,8 @@ func Connect() {
 
 	DB = db
 
+	fmt.Println("Connection Opened to Database")
 	db.AutoMigrate(&models.Student{})
+	fmt.Println("Database Migrated")
 
 }
