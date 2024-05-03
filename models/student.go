@@ -1,10 +1,12 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Student struct {
 	gorm.Model
-	Username string `gorm:"uniqueIndex;not null" json:"username"`
-	Email    string `gorm:"uniqueIndex;not null" json:"email"`
-	Password string `gorm:"not null" json:"password"`
+	Username string `gorm:"not null" json:"username"`
+	Email    string `gorm:"uniqueIndexnot null" json:"email"`
+	Password []byte `gorm:"not null" json:"password"`
 }

@@ -3,9 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <title>U to E</title>
   </head>
   <body>
-    Login page
+    Login In
+
+    <form hx-post="/login" hx-trigger="submit" hx-redirect="/dashbaord">
+      <input type="email" name="email" id="email" />
+      <input type="password" name="password" id="password" />
+      <button type="submit">Sign In</button>
+      <button>Forgot password</button>
+    </form>
+    <div id="response"></div>
   </body>
 </html>
