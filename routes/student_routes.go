@@ -7,10 +7,14 @@ import (
 )
 
 func SetupStudentRoutes(app *fiber.App) {
+
+	//GET
 	app.Get("/", controller.RenderLogin)
-	app.Get("/adminpanel", middleware.Protected, controller.RenderAdmin)
+	app.Get("/adminpanel", controller.RenderAdmin, middleware.Protected)
+	app.Get("/dashboard", controller.RenderDashboard, middleware.Protected)
+
+	//POST
 	app.Post("/signup", controller.Register)
 	app.Post("/login", controller.Handlelogin)
-	app.Get("/dashboard", middleware.Protected, controller.RenderDashboard)
-	app.Post("/logout", middleware.Protected, controller.Logout)
+	app.Post("/logout", controller.Logout, middleware.Protected)
 }

@@ -38,6 +38,25 @@ func Handlelogin(c fiber.Ctx) error {
 	password := c.FormValue("password")
 
 	if isAdmin(email, password) {
+		claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+			Issuer:    strconv.Itoa(int(9899)),
+			Subject:   "1",
+			ExpiresAt: time.Now().Add(time.Hour * 1).Unix(), // 1 hour
+		})
+
+		token, err := claims.SignedString([]byte(config.Config("SECRET")))
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not generate token"})
+		}
+
+		c.Cookie(&fiber.Cookie{
+			Name:     "jwt",
+			Value:    token,
+			Expires:  time.Now().Add(time.Hour * 1),
+			HTTPOnly: true,
+			Secure:   true,
+			SameSite: "Strict",
+		})
 		return c.Redirect().To("/adminpanel")
 	}
 
@@ -56,7 +75,7 @@ func Handlelogin(c fiber.Ctx) error {
 	c.Cookie(&fiber.Cookie{
 		Name:     "jwt",
 		Value:    token,
-		Expires:  time.Now().Add(time.Hour * 24),
+		Expires:  time.Now().Add(time.Hour * 1),
 		HTTPOnly: true,
 		Secure:   true,
 		SameSite: "Strict",
@@ -86,7 +105,7 @@ func authenticateUser(email, password string) (*models.Student, error) {
 func generateJWT(userID uint) (string, error) {
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Issuer:    strconv.Itoa(int(userID)),
-		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // 1 day
+		ExpiresAt: time.Now().Add(time.Hour * 1).Unix(), // 1 hour
 	})
 
 	return claims.SignedString([]byte(config.Config("SECRET")))
