@@ -6,10 +6,39 @@
     <title>Document</title>
   </head>
   <body>
-    Hi {{ .Username }}!
+    Hi Admin!
 
-    <h1>CSV Register</h1>
-    <input type="file" name="" id="" />
-    <button>Submit</button>
+    <h1>Student Bulk Register</h1>
+
+    <form
+      id="studentForm"
+      enctype="multipart/form-data"
+      hx-post="/admin/panel/register/student"
+    >
+      <input type="file" name="file" id="file" />
+      <button type="submit">Submit</button>
+    </form>
+
+    <h1>Mentor Bulk Register</h1>
+    <form
+      id="mentorForm"
+      enctype="multipart/form-data"
+      hx-post="/admin/panel/register/mentor"
+    >
+      <input type="file" name="file" id="file" />
+      <button type="submit">Submit</button>
+    </form>
+
+    <h1>Password Hash Generator</h1>
+    <form
+      id="passForm"
+      enctype="multipart/form-data"
+      hx-post="/admin/panel/password/gen"
+    >
+      <input type="text" name="password" id="password" />
+      <button type="submit">Submit</button>
+    </form>
+
+    <script src="https://unpkg.com/htmx.org/dist/htmx.js"></script>
   </body>
 </html>

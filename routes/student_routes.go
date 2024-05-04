@@ -8,13 +8,20 @@ import (
 
 func SetupStudentRoutes(app *fiber.App) {
 
+	student := app.Group("/student")
+	// mentor := app.Group("/mentor")
+	admin := app.Group("/admin")
+
 	//GET
 	app.Get("/", controller.RenderLogin)
-	app.Get("/adminpanel", controller.RenderAdmin, middleware.Protected)
-	app.Get("/dashboard", controller.RenderDashboard, middleware.Protected)
+	admin.Get("/panel", controller.RenderAdmin, middleware.ProtectedAdmin)
+	student.Get("/dashboard", controller.RenderDashboard, middleware.Protected)
 
 	//POST
 	app.Post("/signup", controller.Register)
 	app.Post("/login", controller.Handlelogin)
 	app.Post("/logout", controller.Logout, middleware.Protected)
+	admin.Post("/panel/register/student", controller.AddStudent, middleware.ProtectedAdmin)
+	admin.Post("/panel/register/mentor", controller.AddMentor, middleware.ProtectedAdmin)
+	admin.Post("/panel/password/gen", controller.PasswordGenrator, middleware.ProtectedAdmin)
 }

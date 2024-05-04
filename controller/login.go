@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -10,6 +12,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v3"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 func RenderLogin(c fiber.Ctx) error {
@@ -19,16 +22,26 @@ func RenderLogin(c fiber.Ctx) error {
 func Register(c fiber.Ctx) error {
 	email := c.FormValue("email")
 	passwd := c.FormValue("password")
+	collageID := c.FormValue("CollageID")
+	name := c.FormValue("name")
 
 	password, _ := bcrypt.GenerateFromPassword([]byte(passwd), 14)
 
-	user := models.Student{
-		Username: email,
-		Email:    email,
-		Password: password,
+	user := models.Login{
+		Email:     email,
+		Password:  password,
+		CollageID: collageID,
+	}
+
+	student := models.Student{
+		Name:      name,
+		CollageID: collageID,
+		Level:     0,
+		Marks:     0,
 	}
 
 	database.DB.Create(&user)
+	database.DB.Table(collageID).Create(student)
 
 	return c.SendString("Now login in")
 }
@@ -57,7 +70,7 @@ func Handlelogin(c fiber.Ctx) error {
 			Secure:   true,
 			SameSite: "Strict",
 		})
-		return c.Redirect().To("/adminpanel")
+		return c.Redirect().To("/admin/panel")
 	}
 
 	user, err := authenticateUser(email, password)
@@ -81,7 +94,7 @@ func Handlelogin(c fiber.Ctx) error {
 		SameSite: "Strict",
 	})
 
-	return c.Redirect().To("/dashboard")
+	return c.Redirect().To("/student/dashboard")
 
 }
 
@@ -90,16 +103,28 @@ func isAdmin(email, password string) bool {
 }
 
 func authenticateUser(email, password string) (*models.Student, error) {
-	var user models.Student
+	var user models.Login
 	if err := database.DB.Where("email = ?", email).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("user with email %s not found", email)
+		}
 		return nil, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return nil, fmt.Errorf("incorrect password for user %s", email)
+	}
+
+	var student models.Student
+
+	if err := database.DB.Table(user.CollageID).Where("email = ?", email).First(&student).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("user with email %s not found", email)
+		}
 		return nil, err
 	}
 
-	return &user, nil
+	return &student, nil
 }
 
 func generateJWT(userID uint) (string, error) {

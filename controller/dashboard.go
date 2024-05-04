@@ -27,12 +27,16 @@ func RenderDashboard(c fiber.Ctx) error {
 
 	claims := token.Claims.(*jwt.StandardClaims)
 
-	var user models.Student
+	var login models.Login
+	var student models.Student
 
-	database.DB.Where("id = ?", claims.Issuer).First(&user)
+	database.DB.Table("logins").Where("id = ?", claims.Issuer).First(&login)
+	database.DB.Table(login.CollageID).Where("email = ?", login.Email).First(&student)
 
 	return c.Render("dashboard", fiber.Map{
-		"User": user.Username,
+		"User":  student.Name,
+		"Level": student.Level,
+		"Marks": student.Marks,
 	})
 }
 

@@ -6,9 +6,10 @@ import (
 
 type Student struct {
 	gorm.Model
-	Username  string `gorm:"not null" json:"username"`
+	Name      string `gorm:"not null" json:"username"`
 	Email     string `gorm:"uniqueIndexnot null" json:"email"`
-	Password  []byte `gorm:"not null" json:"password"`
-	CollageID int    `gorm:"not null" json:"collageid"`
-	Role      string `gorm:"not null" json:"role"`
+	CollageID string `gorm:"not null" json:"collageid"`
+	MentorID  string `gorm:"not null" json:"mentorid"`
+	Level     int    `gorm:"column:level"`
+	Marks     int    `gorm:"column:level"`
 }
