@@ -1,11 +1,7 @@
 package middleware
 
 import (
-	"strconv"
-
 	"github.com/U-to-E/dashboard/config"
-	"github.com/U-to-E/dashboard/database"
-	"github.com/U-to-E/dashboard/models"
 	"github.com/gofiber/fiber/v3"
 	"github.com/golang-jwt/jwt"
 )
@@ -26,10 +22,10 @@ func Protected(c fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
 	}
 
-	userID, _ := strconv.Atoi(claims.Issuer)
-	var user models.Student
-	database.DB.First(&user, uint(userID))
+	// userEmail := claims.Issuer
+	// var user models.Student
+	// // database.DB.Table(claims.Id).Where("email = ?", claims.Issuer).First(&user, userEmail)
 
-	c.Locals("user", user)
+	// c.Locals("user", user)
 	return c.Next()
 }

@@ -9,7 +9,12 @@
   <body>
     Login In
 
-    <form hx-post="/login" hx-trigger="submit" hx-redirect="/dashbaord">
+    <form
+      hx-post="/login"
+      hx-trigger="submit"
+      hx-target="this"
+      hx-swap="outerHTML"
+    >
       <input type="email" name="email" id="email" />
       <input type="password" name="password" id="password" />
       <button type="submit">Sign In</button>
@@ -19,4 +24,13 @@
     </form>
     <div id="response"></div>
   </body>
+
+  <script>
+    document.body.addEventListener('htmx:afterSwap', function (event) {
+      const response = event.detail.xhr.response
+      if (response.redirect) {
+        window.location.href = response.redirect
+      }
+    })
+  </script>
 </html>

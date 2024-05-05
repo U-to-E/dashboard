@@ -18,7 +18,6 @@ func SetupStudentRoutes(app *fiber.App) {
 	student.Get("/dashboard", controller.RenderDashboard, middleware.Protected)
 
 	//POST
-	app.Post("/signup", controller.Register)
 	app.Post("/login", controller.Handlelogin)
 	app.Post("/logout", controller.Logout, middleware.Protected)
 	admin.Post("/panel/register/student", controller.AddStudent, middleware.ProtectedAdmin)

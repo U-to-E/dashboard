@@ -30,7 +30,7 @@ func RenderDashboard(c fiber.Ctx) error {
 	var login models.Login
 	var student models.Student
 
-	database.DB.Table("logins").Where("id = ?", claims.Issuer).First(&login)
+	database.DB.Table("logins").Where("email = ?", claims.Issuer).First(&login)
 	database.DB.Table(login.CollageID).Where("email = ?", login.Email).First(&student)
 
 	return c.Render("dashboard", fiber.Map{

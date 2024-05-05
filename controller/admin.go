@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/csv"
+	"strings"
 
 	"github.com/U-to-E/dashboard/database"
 	"github.com/U-to-E/dashboard/models"
@@ -9,13 +10,20 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type Table struct {
+	TableName string `gorm:"column:table_name"`
+}
+
 func RenderAdmin(c fiber.Ctx) error {
 
+	table := CollageIDList()
 	if c.IP() != "127.0.0.1" && c.IP() != "::1" {
 		return c.Status(fiber.StatusForbidden).SendString("Forbidden")
 	}
 
-	return c.Render("admin", fiber.Map{})
+	return c.Render("admin", fiber.Map{
+		"Table": table,
+	})
 }
 
 func AddStudent(c fiber.Ctx) error {
@@ -153,4 +161,26 @@ func PasswordGenrator(c fiber.Ctx) error {
 	password, _ := bcrypt.GenerateFromPassword([]byte(pass), 14)
 
 	return c.Send(password)
+}
+
+func filterTablesWithPrefix(tables []Table, prefix string) []Table {
+	var filtered []Table
+	for _, table := range tables {
+		if strings.HasPrefix(strings.ToLower(table.TableName), strings.ToLower(prefix)) {
+			filtered = append(filtered, table)
+		}
+	}
+	return filtered
+}
+
+func CollageIDList() *[]Table {
+	var tables []Table
+	if err := database.DB.Table("information_schema.tables").Where("table_schema = ?", "public").Pluck("table_name", &tables).Error; err != nil {
+		panic(err)
+	}
+
+	filteredTables := filterTablesWithPrefix(tables, "U")
+
+	return &filteredTables
+
 }

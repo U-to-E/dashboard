@@ -1,16 +1,385 @@
-<!doctype html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx"
+      crossorigin="anonymous"
+    />
+    <title>U to E | DashBoard</title>
+    <style>
+      .side-pane {
+        position: fixed;
+        top: 0;
+        right: -250px; /* Adjust this value to control the initial position */
+        width: 250px; /* Width of the side pane */
+        height: 100%;
+        background-color: #f0f0f0;
+        transition: right 0.3s ease;
+        z-index: 1; /* Ensure the side pane is on top of other content */
+      }
 
-    <title>Dashboard</title>
+      /* Style for the content area */
+      .content {
+        margin-right: 20px; /* Adjust margin for right side */
+        padding: 20px;
+      }
+
+      /* Style for links and buttons */
+      .content a,
+      .content button {
+        display: block; /* Ensure each item is on a new line */
+        margin-bottom: 10px; /* Add spacing between items */
+      }
+
+      /* Style for the icon button */
+      .icon-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px; /* Position on the right side */
+        cursor: pointer;
+        z-index: 2; /* Ensure the button is on top of other content */
+      }
+
+      /* Style for the close button */
+      .close-btn {
+        margin-top: 20px; /* Add spacing between the content and close button */
+      }
+
+      .close-panel-btn {
+        background: #fff;
+        border: none;
+        padding: 10px 20px;
+        display: inline-block;
+        font-size: 15px;
+        font-weight: 600;
+        width: 120px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transform: skew(-21deg);
+      }
+
+      .close-span {
+        display: inline-block;
+        transform: skew(21deg);
+      }
+
+      .close-panel-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 100%;
+        left: 0;
+        background: rgb(20, 20, 20);
+        opacity: 0;
+        z-index: -1;
+        transition: all 0.5s;
+      }
+
+      .close-panel-btn:hover {
+        color: #fff;
+      }
+
+      .close-panel-btn:hover::before {
+        left: 0;
+        right: 0;
+        opacity: 1;
+      }
+
+      .Welcome-Bar {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-right: 25px;
+      }
+
+      .heading {
+        font-size: 30px;
+        font-weight: 600;
+        color: #000000;
+      }
+
+      .student_name {
+        font-family: cursive;
+        margin-right: 5px;
+        font-weight: 600;
+      }
+
+      .sidebar-left {
+        background-color: #6377f4;
+        color: white;
+        width: 15%;
+        height: 100vh;
+        padding: 20px;
+      }
+
+      .Study-materials-grid {
+        display: flex;
+        flex-direction: row;
+        overflow-y: auto;
+        flex-wrap: wrap;
+        height: 250;
+      }
+
+      .main-content {
+        background-color: #ffffff;
+        width: 100%;
+        padding: 10px;
+        height: 100vh;
+      }
+
+      .main-content h1 {
+        margin-bottom: 15px;
+      }
+
+      .study-material-card {
+        background-color: #f5f5f5;
+        width: 370px;
+        padding: 15px;
+        height: 100%;
+        border-radius: 15px;
+        margin: 15px;
+        max-height: 200px;
+      }
+
+      .grid .bg-yellow-100 h2,
+      .grid .bg-red-100 h2 {
+        margin-bottom: 5px;
+      }
+
+      .continue_button {
+        background-color: #428bca;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .continue_button:hover {
+        background-color: #337ab7;
+      }
+
+      /* Right sidebar styles */
+      .Progress-section {
+        background-color: #475569;
+        color: white;
+        width: 20%;
+        height: 100vh;
+        padding: 20px;
+      }
+
+      /* Progress bar and certificate button styles */
+      .progress-button {
+        background-color: #e53e4f;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .progress-button:hover {
+        background-color: #c53030;
+      }
+    </style>
   </head>
   <body>
-    <h1>Hi!! {{ .User }}</h1>
-    <p>Level: {{ .Level }}</p>
-    <button>Change Password</button>
-    <button hx-post="/logout">Logout</button>
+    <div>
+      <div class="d-flex flex-row">
+        <div class="Progress-section">
+          <div class="">
+            <h1 class="text-xl mb-4">My Progress</h1>
+            {{ if eq .Level 1 }}
+            <p>Level - 1</p>
+            <ul>
+              <li>Module - 1</li>
+              <li>Module - 2</li>
+              <li>Module - 3</li>
+            </ul>
+
+            {{ end }} {{ if eq .Level 2 }}
+            <p>Level - 1</p>
+            <ul>
+              <li>Module - 1</li>
+              <li>Module - 2</li>
+              <li>Module - 3</li>
+            </ul>
+            <p>Level - 2</p>
+            <ul>
+              <li>Module - 1</li>
+              <li>Module - 2</li>
+            </ul>
+            {{ end }} {{ if eq .Level 3 }}
+            <p>Level - 1</p>
+            <ul>
+              <li>Module - 1</li>
+              <li>Module - 2</li>
+              <li>Module - 3</li>
+            </ul>
+            <p>Level - 2</p>
+            <ul>
+              <li>Module - 1</li>
+              <li>Module - 2</li>
+            </ul>
+            <p>Level - 3</p>
+            <ul>
+              <li>Module - 1</li>
+              <li>Module - 2</li>
+            </ul>
+            {{ end }} {{ if eq .Level 4 }}
+            <p>Level - 1</p>
+            <ul>
+              <li>Module - 1</li>
+              <li>Module - 2</li>
+              <li>Module - 3</li>
+            </ul>
+            <p>Level - 2</p>
+            <ul>
+              <li>Module - 1</li>
+              <li>Module - 2</li>
+            </ul>
+            <p>Level - 3</p>
+            <ul>
+              <li>Module - 1</li>
+              <li>Module - 2</li>
+            </ul>
+            <p>Level - 4</p>
+            <ul>
+              <li>Module - 1</li>
+              <li>Module - 2</li>
+              <li>Module - 3</li>
+            </ul>
+            {{ end }}
+
+            <button class="progress-button mt-4">Get your certificate</button>
+          </div>
+        </div>
+
+        <div class="main-content">
+          <div class="Welcome-Bar">
+            <h1 class="text-3xl mb-4">
+              Welcome <span class="student_name">{{ .User }}</span> 👋
+            </h1>
+            <div class="d-flex flex-row">
+              <div class="icon-btn" onclick="openSidePane()">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  alt="Menu Icon"
+                  width="43"
+                  height="43"
+                  fill="currentColor"
+                  class="bi bi-person"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"
+                  />
+                </svg>
+              </div>
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="33"
+                height="33"
+                fill="currentColor"
+                class="d-md-none bi bi-three-dots-vertical mt-1"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"
+                />
+              </svg>
+            </div>
+          </div>
+
+          <div class="side-pane d-flex flex-column" id="sidePane">
+            <div class="content">
+              <a> Total Mock Marks - {{ .Marks }}</a>
+              <a>Student details</a>
+              <a>Mentor Details</a>
+              <button hx-post="/logout">Logout</button>
+              <button class="close-panel-btn" onclick="closeSidePane()">
+                <span class="close-span">Close</span>
+              </button>
+              <!-- Button to close the side pane -->
+            </div>
+          </div>
+
+          <div class="">
+            <h1 class="heading">Study Material</h1>
+            <div class="Study-materials-grid">
+              <div class="study-material-card rounded-lg shadow">
+                <h2 class="font-bold">Study Material - 1</h2>
+                <p>Study Material - 1</p>
+                <p>📖 LEARNING ⏰ 30Mins</p>
+                <button class="continue_button">Continue →</button>
+              </div>
+
+              <div class="study-material-card rounded-lg shadow">
+                <h2 class="font-bold">Study Material - 2</h2>
+                <p>Study Material - 1</p>
+                <p>📖 LEARNING ⏰ 30Mins</p>
+                <button class="continue_button">Continue →</button>
+              </div>
+
+              <div class="study-material-card rounded-lg shadow">
+                <h2 class="font-bold">Study Material - 3</h2>
+                <p>Study Material - 1</p>
+                <p>📖 LEARNING ⏰ 30Mins</p>
+                <button class="continue_button">Continue →</button>
+              </div>
+
+              <div class="study-material-card rounded-lg shadow">
+                <h2 class="font-bold">Study Material - 4</h2>
+                <p>Study Material - 1</p>
+                <p>📖 LEARNING ⏰ 30Mins</p>
+                <button class="continue_button">Continue →</button>
+              </div>
+            </div>
+          </div>
+
+          <hr class="hr hr-blurry" />
+
+          <div class="">
+            <h1 class="heading">Mock Tests</h1>
+            <div class="Study-materials-grid">
+              <div class="study-material-card rounded-lg shadow">
+                <h2 class="font-bold">Mock test - 1</h2>
+                <p>test - 1</p>
+                <p>📖 Practise ⏰ 50Mins</p>
+                <button class="continue_button">Continue →</button>
+              </div>
+
+              <div class="study-material-card rounded-lg shadow">
+                <h2 class="font-bold">Mock test - 2</h2>
+                <p>test - 1</p>
+                <p>📖 Practise ⏰ 50Mins</p>
+                <button class="continue_button">Continue →</button>
+              </div>
+
+              <div class="study-material-card rounded-lg shadow">
+                <h2 class="font-bold">Mock test - 3</h2>
+                <p>test - 1</p>
+                <p>📖 Practise ⏰ 50Mins</p>
+                <button class="continue_button">Continue →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://unpkg.com/htmx.org/dist/htmx.js"></script>
+
+    <script>
+      function openSidePane() {
+        document.getElementById('sidePane').style.right = '0'
+      }
+
+      function closeSidePane() {
+        document.getElementById('sidePane').style.right = '-250px'
+      }
+    </script>
   </body>
 </html>

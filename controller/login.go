@@ -19,32 +19,32 @@ func RenderLogin(c fiber.Ctx) error {
 	return c.Render("login", fiber.Map{})
 }
 
-func Register(c fiber.Ctx) error {
-	email := c.FormValue("email")
-	passwd := c.FormValue("password")
-	collageID := c.FormValue("CollageID")
-	name := c.FormValue("name")
+// func Register(c fiber.Ctx) error {
+// 	email := c.FormValue("email")
+// 	passwd := c.FormValue("password")
+// 	collageID := c.FormValue("CollageID")
+// 	name := c.FormValue("name")
 
-	password, _ := bcrypt.GenerateFromPassword([]byte(passwd), 14)
+// 	password, _ := bcrypt.GenerateFromPassword([]byte(passwd), 14)
 
-	user := models.Login{
-		Email:     email,
-		Password:  password,
-		CollageID: collageID,
-	}
+// 	user := models.Login{
+// 		Email:     email,
+// 		Password:  password,
+// 		CollageID: collageID,
+// 	}
 
-	student := models.Student{
-		Name:      name,
-		CollageID: collageID,
-		Level:     0,
-		Marks:     0,
-	}
+// 	student := models.Student{
+// 		Name:      name,
+// 		CollageID: collageID,
+// 		Level:     0,
+// 		Marks:     0,
+// 	}
 
-	database.DB.Create(&user)
-	database.DB.Table(collageID).Create(student)
+// 	database.DB.Create(&user)
+// 	database.DB.Table(collageID).Create(student)
 
-	return c.SendString("Now login in")
-}
+// 	return c.SendString("Now login in")
+// }
 
 func Handlelogin(c fiber.Ctx) error {
 	email := c.FormValue("email")
@@ -73,12 +73,32 @@ func Handlelogin(c fiber.Ctx) error {
 		return c.Redirect().To("/admin/panel")
 	}
 
-	user, err := authenticateUser(email, password)
+	user, mentor, err := authenticateUser(email, password)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid email or password"})
 	}
 
-	token, err := generateJWT(user.ID)
+	if mentor != nil {
+		token, err := generateJWT(mentor.Email, mentor.Name)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not generate token"})
+		}
+
+		c.Locals("mentor", mentor)
+
+		c.Cookie(&fiber.Cookie{
+			Name:     "jwt",
+			Value:    token,
+			Expires:  time.Now().Add(time.Hour * 1),
+			HTTPOnly: true,
+			Secure:   true,
+			SameSite: "Strict",
+		})
+
+		return c.Redirect().To("/mentor/dashboard")
+	}
+
+	token, err := generateJWT(user.Email, user.CollageID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not generate token"})
 	}
@@ -102,34 +122,45 @@ func isAdmin(email, password string) bool {
 	return email == config.Config("ADMIN_EMAIL") && password == config.Config("ADMIN_PASS")
 }
 
-func authenticateUser(email, password string) (*models.Student, error) {
+func authenticateUser(email, password string) (*models.Student, *models.Mentor, error) {
 	var user models.Login
-	if err := database.DB.Where("email = ?", email).First(&user).Error; err != nil {
+	if err := database.DB.Table("logins").Where("email = ?", email).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("user with email %s not found", email)
+			return nil, nil, fmt.Errorf("user with email %s not found", email)
 		}
-		return nil, err
+		return nil, nil, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return nil, fmt.Errorf("incorrect password for user %s", email)
+		return nil, nil, fmt.Errorf("incorrect password for user %s", email)
 	}
 
-	var student models.Student
+	if user.Role == "Mentor" {
+		var mentor models.Mentor
+		if err := database.DB.Table("mentors").Where("email = ?", email).First(&mentor).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, nil, fmt.Errorf("user with email %s not found", email)
+			}
+			return nil, nil, err
+		}
 
+		return nil, &mentor, nil
+	}
+	var student models.Student
 	if err := database.DB.Table(user.CollageID).Where("email = ?", email).First(&student).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("user with email %s not found", email)
+			return nil, nil, fmt.Errorf("user with email %s not found", email)
 		}
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &student, nil
+	return &student, nil, nil
 }
 
-func generateJWT(userID uint) (string, error) {
+func generateJWT(userEmail string, collageId string) (string, error) {
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    strconv.Itoa(int(userID)),
+		Id:        collageId,
+		Issuer:    userEmail,
 		ExpiresAt: time.Now().Add(time.Hour * 1).Unix(), // 1 hour
 	})
 
