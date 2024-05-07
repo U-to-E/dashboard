@@ -22,7 +22,7 @@ func Connect() {
 	DB = db
 
 	fmt.Println("Connection Opened to Database")
-	db.AutoMigrate(&models.Student{}, &models.Login{}, &models.Mentor{})
+	db.AutoMigrate(&models.Student{}, &models.Login{}, &models.Mentor{}, &models.Mapping{})
 	fmt.Println("Database Migrated")
 
 }

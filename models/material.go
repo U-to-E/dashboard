@@ -2,8 +2,9 @@ package models
 
 import "gorm.io/gorm"
 
-type Material struct {
+type Mappings struct {
 	gorm.Model
-	Name     string `gorm:"column:name;not null"`
-	FileName string `gorm:"column:filename;not null"`
+	MentorID   uint
+	CollegeID  uint
+	StudentsID []uint `gorm:"type:integer[]"`
 }

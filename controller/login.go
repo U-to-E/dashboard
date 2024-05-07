@@ -75,7 +75,7 @@ func Handlelogin(c fiber.Ctx) error {
 
 	user, mentor, err := authenticateUser(email, password)
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid email or password"})
+		return c.Status(fiber.StatusUnauthorized).SendString("Invalid email or password")
 	}
 
 	if mentor != nil {

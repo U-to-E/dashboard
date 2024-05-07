@@ -24,17 +24,22 @@
     <form
       id="studentForm"
       enctype="multipart/form-data"
-      hx-post="/admin/panel/register/student"
+      hx-post="/admin/panel/register/singlestudent"
     >
       <input
         type="text"
-        name="Name"
+        name="name"
         id="Name"
         placeholder="Name of the Student"
       />
-      <input type="text" name="Name" id="Name" placeholder="Email" />
-      <input type="text" name="Name" id="Name" placeholder="Password Hash" />
-      <input type="text" name="Name" id="Name" placeholder="Collage ID" />
+      <input type="text" name="email" id="Name" placeholder="Email" />
+      <input
+        type="text"
+        name="password"
+        id="Name"
+        placeholder="Password Hash"
+      />
+      <input type="text" name="collageID" id="Name" placeholder="Collage ID" />
       <button type="submit">Submit</button>
     </form>
 
@@ -51,16 +56,21 @@
     <form
       id="studentForm"
       enctype="multipart/form-data"
-      hx-post="/admin/panel/register/student"
+      hx-post="/admin/panel/register/singlementor"
     >
       <input
         type="text"
-        name="Name"
+        name="name"
         id="Name"
         placeholder="Name of the Mentor"
       />
-      <input type="text" name="Name" id="Name" placeholder="Email" />
-      <input type="text" name="Name" id="Name" placeholder="Password Hash" />
+      <input type="text" name="email" id="Name" placeholder="Email" />
+      <input
+        type="text"
+        name="password"
+        id="Name"
+        placeholder="Password Hash"
+      />
       <button type="submit">Submit</button>
     </form>
 
@@ -74,14 +84,50 @@
       <button type="submit">Submit</button>
     </form>
     <h1>Edit student list</h1>
-    <select>
-      <option value="">Select a Collage ID</option>
-      {{ range .Table }}
-      <option value="{{ .TableName }}">{{ .TableName }}</option>
-      {{ end }}
-    </select>
-    <button>Submit</button>
+
+    <form
+      hx-post="/admin/panel/collage/id"
+      hx-trigger="submit"
+      hx-refresh="true"
+      hx-ext="redirectToResponseUrl"
+    >
+      <select name="collageId">
+        <option value="">Select a Collage ID</option>
+        {{ range .Table }}
+        <option value="{{ .TableName }}">{{ .TableName }}</option>
+        {{ end }}
+      </select>
+      <button type="submit">Submit</button>
+    </form>
+
+    <h1>Bulk Mentor Mapping</h1>
+    <form
+      hx-get="/admin/panel/mentormapping"
+      hx-trigger="submit"
+      hx-refresh="true"
+      hx-ext="redirectToResponseUrl"
+    >
+      <input type="text" name="mentorID" id="" placeholder="Enter Mentor ID" />
+      <input
+        type="text"
+        name="collageID"
+        id=""
+        placeholder="Enter Collage ID"
+      />
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <button hx-post="/logout" hx-ext="redirectToResponseUrl">Log out</button>
 
     <script src="https://unpkg.com/htmx.org/dist/htmx.js"></script>
+    <script>
+      htmx.defineExtension('redirectToResponseUrl', {
+        transformResponse: function (text, xhr) {
+          globalThis.document.location = xhr.responseURL
+          return 'Logging out....'
+        },
+      })
+    </script>
   </body>
 </html>

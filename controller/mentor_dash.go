@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"time"
-
 	"github.com/U-to-E/dashboard/config"
 	"github.com/U-to-E/dashboard/database"
 	"github.com/U-to-E/dashboard/models"
@@ -10,8 +8,7 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-func RenderDashboard(c fiber.Ctx) error {
-
+func RenderMentorDash(c fiber.Ctx) error {
 	cookie := c.Cookies("jwt")
 
 	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
@@ -28,27 +25,12 @@ func RenderDashboard(c fiber.Ctx) error {
 	claims := token.Claims.(*jwt.StandardClaims)
 
 	var login models.Login
-	var student models.Student
+	var mentor models.Mentor
 
 	database.DB.Table("logins").Where("email = ?", claims.Issuer).First(&login)
-	database.DB.Table(login.CollageID).Where("email = ?", login.Email).First(&student)
+	database.DB.Table("mentors").Where("email = ?", login.Email).First(&mentor)
 
-	return c.Render("dashboard", fiber.Map{
-		"User":  student.Name,
-		"Level": student.Level,
-		"Marks": student.Marks,
+	return c.Render("mentordash", fiber.Map{
+		"User": mentor,
 	})
-}
-
-func Logout(c fiber.Ctx) error {
-	cookie := fiber.Cookie{
-		Name:     "jwt",
-		Value:    "",
-		Expires:  time.Now().Add(-time.Hour),
-		HTTPOnly: true,
-	}
-
-	c.Cookie(&cookie)
-
-	return c.Redirect().To("/")
 }

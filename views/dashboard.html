@@ -8,6 +8,21 @@
     />
     <title>U to E | DashBoard</title>
     <style>
+      .spinner {
+        display: none;
+      }
+
+      .htmx-request .spinner {
+        display: inline;
+      }
+
+      .htmx-request.spinner {
+        display: inline;
+      }
+
+      .htmx-request.spinner ~ .button-text {
+        display: none;
+      }
       .side-pane {
         position: fixed;
         top: 0;
@@ -299,7 +314,9 @@
               <a> Total Mock Marks - {{ .Marks }}</a>
               <a>Student details</a>
               <a>Mentor Details</a>
-              <button hx-post="/logout">Logout</button>
+              <button hx-post="/logout" hx-ext="redirectToResponseUrl">
+                Logout
+              </button>
               <button class="close-panel-btn" onclick="closeSidePane()">
                 <span class="close-span">Close</span>
               </button>
@@ -376,6 +393,13 @@
       function openSidePane() {
         document.getElementById('sidePane').style.right = '0'
       }
+
+      htmx.defineExtension('redirectToResponseUrl', {
+        transformResponse: function (text, xhr) {
+          globalThis.document.location = xhr.responseURL
+          return 'Logging out....'
+        },
+      })
 
       function closeSidePane() {
         document.getElementById('sidePane').style.right = '-250px'

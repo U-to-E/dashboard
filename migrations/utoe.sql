@@ -101,6 +101,44 @@ ALTER SEQUENCE public.logins_id_seq OWNED BY public.logins.id;
 
 
 --
+-- Name: mappings; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.mappings (
+    id bigint NOT NULL,
+    created_at timestamp with time zone,
+    updated_at timestamp with time zone,
+    deleted_at timestamp with time zone,
+    mentor_id text NOT NULL,
+    college_id text NOT NULL,
+    students_id integer[]
+);
+
+
+ALTER TABLE public.mappings OWNER TO postgres;
+
+--
+-- Name: mappings_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.mappings_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.mappings_id_seq OWNER TO postgres;
+
+--
+-- Name: mappings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.mappings_id_seq OWNED BY public.mappings.id;
+
+
+--
 -- Name: mentors; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -192,6 +230,13 @@ ALTER TABLE ONLY public.logins ALTER COLUMN id SET DEFAULT nextval('public.login
 
 
 --
+-- Name: mappings id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.mappings ALTER COLUMN id SET DEFAULT nextval('public.mappings_id_seq'::regclass);
+
+
+--
 -- Name: mentors id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -241,6 +286,17 @@ COPY public.logins (id, created_at, updated_at, deleted_at, name, email, passwor
 1	2024-05-04 22:07:08.938905+05:30	2024-05-04 22:07:08.938905+05:30	\N	Harshith reddy	hmadhadi@gitam.in	\\x2432612431342461633343766b4f552f4c6172543645365066562e64656d476c7376304c72515642704d364f546d49766b684e585373377363744536	U100	Student
 2	2024-05-04 22:07:08.945427+05:30	2024-05-04 22:07:08.945427+05:30	\N	Rahul	hsdbfh@hh.in	\\x2432612431342461633343766b4f552f4c6172543645365066562e64656d476c7376304c72515642704d364f546d49766b684e585373377363744536	U100	Student
 3	2024-05-04 22:07:08.950498+05:30	2024-05-04 22:07:08.950498+05:30	\N	Big	jkdfh@jjdb.jj	\\x2432612431342461633343766b4f552f4c6172543645365066562e64656d476c7376304c72515642704d364f546d49766b684e585373377363744536	U100	Student
+4	2024-05-06 18:15:43.093796+05:30	2024-05-06 18:15:43.093796+05:30	\N	Harish	hrish@utoe.in	\\x243261243134243047526b387742396d4d6b77574d784e474b644f4e2e2f596d7a596744653273796a4d7a42374a6b494f35422f3073433277625875		Mentor
+5	2024-05-06 18:16:11.134992+05:30	2024-05-06 18:16:11.134992+05:30	\N	Home Server	hiii@adm.in	\\x243261243134246b477254774c58554153432e48664e4f67616334466542495141474a49737868305766795a5a384e36316e656a4e767a7334736936	U200	Student
+7	2024-05-06 18:18:54.729662+05:30	2024-05-06 18:18:54.729662+05:30	\N	Home Server	hiii@adm.com	\\x243261243134246b477254774c58554153432e48664e4f67616334466542495141474a49737868305766795a5a384e36316e656a4e767a7334736936	U200	Student
+\.
+
+
+--
+-- Data for Name: mappings; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.mappings (id, created_at, updated_at, deleted_at, mentor_id, college_id, students_id) FROM stdin;
 \.
 
 
@@ -249,6 +305,7 @@ COPY public.logins (id, created_at, updated_at, deleted_at, name, email, passwor
 --
 
 COPY public.mentors (id, created_at, updated_at, deleted_at, name, email) FROM stdin;
+1	2024-05-06 18:15:43.100093+05:30	2024-05-06 18:15:43.100093+05:30	\N	Harish	hrish@utoe.in
 \.
 
 
@@ -271,14 +328,21 @@ SELECT pg_catalog.setval('public."U100_id_seq"', 20, true);
 -- Name: logins_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.logins_id_seq', 3, true);
+SELECT pg_catalog.setval('public.logins_id_seq', 8, true);
+
+
+--
+-- Name: mappings_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.mappings_id_seq', 1, false);
 
 
 --
 -- Name: mentors_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mentors_id_seq', 1, false);
+SELECT pg_catalog.setval('public.mentors_id_seq', 1, true);
 
 
 --
@@ -302,6 +366,14 @@ ALTER TABLE ONLY public."U100"
 
 ALTER TABLE ONLY public.logins
     ADD CONSTRAINT logins_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: mappings mappings_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.mappings
+    ADD CONSTRAINT mappings_pkey PRIMARY KEY (id);
 
 
 --
@@ -339,6 +411,13 @@ CREATE INDEX idx_logins_deleted_at ON public.logins USING btree (deleted_at);
 --
 
 CREATE UNIQUE INDEX idx_logins_email ON public.logins USING btree (email);
+
+
+--
+-- Name: idx_mappings_deleted_at; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_mappings_deleted_at ON public.mappings USING btree (deleted_at);
 
 
 --
