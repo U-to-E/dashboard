@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/csv"
+	"os"
 	"strings"
 
 	"github.com/U-to-E/dashboard/database"
@@ -53,7 +54,7 @@ func AddStudent(c fiber.Ctx) error {
 	}
 
 	for _, record := range records {
-		if len(record) != 4 {
+		if len(record) != 5 {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Invalid parameters in CSV file",
 			})
@@ -71,9 +72,9 @@ func AddStudent(c fiber.Ctx) error {
 			Name:      record[0],
 			Email:     record[1],
 			CollageID: record[3],
-			MentorID:  "0",
+			MentorID:  record[4],
 			Level:     1,
-			Marks:     1,
+			Marks:     0,
 		}
 
 		if err := database.DB.Table("logins").Create(&login).Error; err != nil {
@@ -83,11 +84,7 @@ func AddStudent(c fiber.Ctx) error {
 		}
 
 		if !database.DB.Migrator().HasTable(record[3]) {
-			err := database.DB.Migrator().CreateTable(&gorm.Config{
-				NamingStrategy: schema.NamingStrategy{
-					TablePrefix: record[3] + "_",
-				},
-			}, &models.Student{})
+			err := database.DB.Table(record[3]).Migrator().CreateTable(&models.Student{})
 			if err != nil {
 				panic("failed to create table")
 			}
@@ -98,6 +95,16 @@ func AddStudent(c fiber.Ctx) error {
 				"error": "Error creating student record",
 			})
 		}
+
+		err := os.Mkdir("./materials/"+record[3]+"-"+record[4], 0755)
+
+		if err != nil {
+			if !os.IsExist(err) {
+				return c.SendString("Error creating a DIR")
+			}
+
+		}
+
 	}
 
 	return c.SendString("Students added successfully")
@@ -212,7 +219,7 @@ func AddSingleStudent(c fiber.Ctx) error {
 		CollageID: cID,
 		MentorID:  "0",
 		Level:     1,
-		Marks:     1,
+		Marks:     0,
 	}
 
 	if err := database.DB.Table("logins").Create(&login).Error; err != nil {
@@ -244,6 +251,7 @@ func AddSingleMentor(c fiber.Ctx) error {
 	name := c.FormValue("name")
 	email := c.FormValue("email")
 	pass := c.FormValue("password")
+	phone := c.FormValue("phnumber")
 
 	login := models.Login{
 		Name:     name,
@@ -253,8 +261,10 @@ func AddSingleMentor(c fiber.Ctx) error {
 	}
 
 	mentor := models.Mentor{
-		Name:  name,
-		Email: email,
+		Name:            name,
+		Email:           email,
+		PhoneNumber:     phone,
+		AssignedCollage: "0",
 	}
 
 	if err := database.DB.Table("logins").Create(&login).Error; err != nil {
@@ -291,26 +301,13 @@ func GetStudentList(c fiber.Ctx) error {
 	})
 }
 
-func BulkMentorMapping(c fiber.Ctx) error {
-	mentorId := c.FormValue("mentorID")
-	collageId := c.FormValue("collageID")
+func MapMentorToCollage(c fiber.Ctx) error {
+	mentorID := c.FormValue("mentorID")
+	collageID := c.FormValue("collageId")
 
-	var mentor models.Mentor
-	var students []models.Student
-
-	database.DB.Table("mentors").Where("id = ?", mentorId).First(&mentor)
-	err := database.DB.Table(collageId).Find(&students).Error
-	if err != nil {
-		return c.SendString("Issue with DB")
+	if err := database.DB.Table("mentors").Where("id = ?", mentorID).Update("CID", collageID).Error; err != nil {
+		return err
 	}
 
-	return c.Render("mentormapping", fiber.Map{
-		"Mentor":   mentor,
-		"Students": students,
-	})
-
-}
-
-func UpdateMentorMapping(c fiber.Ctx) error {
-	return nil
+	return c.SendString("Updated")
 }

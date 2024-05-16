@@ -17,8 +17,7 @@ func SetupStudentRoutes(app *fiber.App) {
 	admin.Get("/panel", controller.RenderAdmin, middleware.ProtectedAdmin)
 	admin.Get("/panel/collage/:id", controller.GetStudentList, middleware.ProtectedAdmin)
 	student.Get("/dashboard", controller.RenderDashboard, middleware.Protected)
-	mentor.Get("/dashboard", controller.RenderMentorDash, middleware.Protected)
-	admin.Get("/panel/mentormapping", controller.BulkMentorMapping, middleware.ProtectedAdmin)
+	mentor.Get("/dashboard", controller.RenderMentorDash, middleware.MentorProtected)
 
 	//POST
 	app.Post("/login", controller.Handlelogin)
@@ -29,6 +28,8 @@ func SetupStudentRoutes(app *fiber.App) {
 	admin.Post("/panel/register/singlementor", controller.AddSingleMentor, middleware.ProtectedAdmin)
 	admin.Post("/panel/password/gen", controller.PasswordGenrator, middleware.ProtectedAdmin)
 	admin.Post("/panel/collage/id", controller.PostCID, middleware.ProtectedAdmin)
-	admin.Get("/panel/mentormapping", controller.UpdateMentorMapping, middleware.ProtectedAdmin)
+	admin.Post("/panel/mentormapping", controller.MapMentorToCollage, middleware.ProtectedAdmin)
+	mentor.Post("/dashboard/material/add", controller.PostMaterial, middleware.MentorProtected)
+	mentor.Post("/dashboard/material/delete", controller.DeleteMaterial, middleware.MentorProtected)
 
 }

@@ -8,6 +8,7 @@
   </head>
   <body>
     Hi Admin!
+
     <h1>Student List</h1>
 
     <table>
@@ -25,18 +26,41 @@
       {{ range .Students }}
       <tr>
         <td>{{ .ID }}</td>
-        <td>{{ .Name }}</td>
-        <td>{{ .Email }}</td>
-        <td>{{ .CollageID }}</td>
-        <td>{{ .MentorID }}</td>
-        <td>{{ .Level }}</td>
-        <td>{{ .Marks }}</td>
-        <td><button>Edit</button></td>
+        <td data-hx-target="this" data-hx-swap="outerHTML">{{ .Name }}</td>
+        <td data-hx-target="this" data-hx-swap="outerHTML">{{ .Email }}</td>
+        <td data-hx-target="this" data-hx-swap="outerHTML">{{ .CollageID }}</td>
+        <td data-hx-target="this" data-hx-swap="outerHTML">{{ .MentorID }}</td>
+        <td data-hx-target="this" data-hx-swap="outerHTML">{{ .Level }}</td>
+        <td data-hx-target="this" data-hx-swap="outerHTML">{{ .Marks }}</td>
+        <td>
+          <button
+            data-hx-target="#edit-form"
+            data-hx-swap="outerHTML swap:outerHTML->beforeSwap"
+            data-hx-values='{"cellValue":"{{ .Name }}", "rowId":"{{ .ID }}"}'
+          >
+            Edit
+          </button>
+        </td>
         <td><button>Delete</button></td>
       </tr>
       {{ end }}
     </table>
+
     <button hx-post="/logout" hx-ext="redirectToResponseUrl">Log out</button>
+
+    <div id="edit-form" style="display: block">
+      <input type="text" id="edit-input" />
+      <button
+        hx-post="/update-student"
+        hx-target="closest tr td[data-hx-target='this']"
+        hx-swap="outerHTML"
+        hx-include="PARENT_CLOSEST(tr)"
+        data-hx-values='{"rowId":"<rowId>"}'
+      >
+        Save
+      </button>
+      <button id="cancel-edit">Cancel</button>
+    </div>
 
     <script src="https://unpkg.com/htmx.org/dist/htmx.js"></script>
     <script>
@@ -46,6 +70,29 @@
           return 'Logging out....'
         },
       })
+
+      document.addEventListener('htmx:beforeSwap', function (event) {
+        if (event.target.matches('[data-hx-target="#edit-form"]')) {
+          event.detail.shouldSwap = false
+          const editForm = document.getElementById('edit-form')
+          const cellValue =
+            event.target.getAttribute('data-hx-values')?.cellValue
+          const rowId = event.target.getAttribute('data-hx-values')?.rowId
+          const editInput = document.getElementById('edit-input')
+          editInput.value = cellValue
+          const saveButton = editForm.querySelector(
+            'button[hx-post="/update-student"]'
+          )
+          saveButton.dataset.hxValues = `{"rowId":"${rowId}"}`
+          editForm.style.display = 'block'
+        }
+      })
+
+      document
+        .getElementById('cancel-edit')
+        .addEventListener('click', function () {
+          document.getElementById('edit-form').style.display = 'none'
+        })
     </script>
   </body>
 </html>

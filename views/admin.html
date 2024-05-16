@@ -71,6 +71,12 @@
         id="Name"
         placeholder="Password Hash"
       />
+      <input
+        type="number"
+        name="phnumber"
+        id="Name"
+        placeholder="Phone Number"
+      />
       <button type="submit">Submit</button>
     </form>
 
@@ -89,7 +95,7 @@
       hx-post="/admin/panel/collage/id"
       hx-trigger="submit"
       hx-refresh="true"
-      hx-ext="redirectToResponseUrl"
+      hx-ext="ResponseUrl"
     >
       <select name="collageId">
         <option value="">Select a Collage ID</option>
@@ -99,22 +105,20 @@
       </select>
       <button type="submit">Submit</button>
     </form>
-
-    <h1>Bulk Mentor Mapping</h1>
-    <form
-      hx-get="/admin/panel/mentormapping"
-      hx-trigger="submit"
-      hx-refresh="true"
-      hx-ext="redirectToResponseUrl"
-    >
-      <input type="text" name="mentorID" id="" placeholder="Enter Mentor ID" />
+    <h1>Mentor mapping to collage</h1>
+    <form hx-post="/admin/panel/mentormapping" hx-trigger="submit">
       <input
         type="text"
-        name="collageID"
+        name="mentorID"
         id=""
-        placeholder="Enter Collage ID"
+        placeholder="Enter mentor ID to map to a collage"
       />
-
+      <select name="collageId">
+        <option value="">Select a Collage ID</option>
+        {{ range .Table }}
+        <option value="{{ .TableName }}">{{ .TableName }}</option>
+        {{ end }}
+      </select>
       <button type="submit">Submit</button>
     </form>
 
@@ -126,6 +130,12 @@
         transformResponse: function (text, xhr) {
           globalThis.document.location = xhr.responseURL
           return 'Logging out....'
+        },
+      })
+      htmx.defineExtension('ResponseUrl', {
+        transformResponse: function (text, xhr) {
+          globalThis.document.location = xhr.responseURL
+          return 'Loading....'
         },
       })
     </script>

@@ -1,11 +1,7 @@
 package models
 
-import (
-	"gorm.io/gorm"
-)
-
 type Student struct {
-	gorm.Model
+	ID        uint   `gorm:"primaryKey"`
 	Name      string `gorm:"not null" json:"username"`
 	Email     string `gorm:"uniqueIndexnot null" json:"email"`
 	CollageID string `gorm:"not null" json:"collageid"`

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"io/ioutil"
 	"time"
 
 	"github.com/U-to-E/dashboard/config"
@@ -29,14 +30,32 @@ func RenderDashboard(c fiber.Ctx) error {
 
 	var login models.Login
 	var student models.Student
+	var mentor models.Mentor
+	var materials []models.Material
 
 	database.DB.Table("logins").Where("email = ?", claims.Issuer).First(&login)
 	database.DB.Table(login.CollageID).Where("email = ?", login.Email).First(&student)
+	database.DB.Table("mentors").Where("id = ?", student.MentorID).First(&mentor)
+
+	files, err := ioutil.ReadDir("./materials/" + student.CollageID + "-" + student.MentorID)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		mat := models.Material{
+			Name:     file.Name(),
+			FilePath: "./materials/" + student.CollageID + "-" + student.MentorID + "/" + file.Name(),
+		}
+		materials = append(materials, mat)
+	}
 
 	return c.Render("dashboard", fiber.Map{
-		"User":  student.Name,
-		"Level": student.Level,
-		"Marks": student.Marks,
+		"User":      student.Name,
+		"Level":     student.Level,
+		"Marks":     student.Marks,
+		"Mentor":    mentor,
+		"Materials": materials,
 	})
 }
 

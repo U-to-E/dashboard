@@ -19,33 +19,6 @@ func RenderLogin(c fiber.Ctx) error {
 	return c.Render("login", fiber.Map{})
 }
 
-// func Register(c fiber.Ctx) error {
-// 	email := c.FormValue("email")
-// 	passwd := c.FormValue("password")
-// 	collageID := c.FormValue("CollageID")
-// 	name := c.FormValue("name")
-
-// 	password, _ := bcrypt.GenerateFromPassword([]byte(passwd), 14)
-
-// 	user := models.Login{
-// 		Email:     email,
-// 		Password:  password,
-// 		CollageID: collageID,
-// 	}
-
-// 	student := models.Student{
-// 		Name:      name,
-// 		CollageID: collageID,
-// 		Level:     0,
-// 		Marks:     0,
-// 	}
-
-// 	database.DB.Create(&user)
-// 	database.DB.Table(collageID).Create(student)
-
-// 	return c.SendString("Now login in")
-// }
-
 func Handlelogin(c fiber.Ctx) error {
 	email := c.FormValue("email")
 	password := c.FormValue("password")
@@ -79,7 +52,14 @@ func Handlelogin(c fiber.Ctx) error {
 	}
 
 	if mentor != nil {
-		token, err := generateJWT(mentor.Email, mentor.Name)
+		claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+			Issuer:    mentor.Email,
+			Id:        strconv.FormatUint(uint64(mentor.ID), 10),
+			Subject:   "2",
+			ExpiresAt: time.Now().Add(time.Hour * 1).Unix(), // 1 hour
+		})
+		token, err := claims.SignedString([]byte(config.Config("SECRET")))
+
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not generate token"})
 		}

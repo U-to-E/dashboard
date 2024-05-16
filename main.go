@@ -16,6 +16,7 @@ func main() {
 	app := fiber.New(fiber.Config{
 		Views: engine,
 	})
+	app.Static("/", "./materials")
 	app.Use(cors.New(), logger.New())
 	database.Connect()
 	routes.SetupStudentRoutes(app)
