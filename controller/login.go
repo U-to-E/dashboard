@@ -43,7 +43,9 @@ func Handlelogin(c fiber.Ctx) error {
 			Secure:   true,
 			SameSite: "Strict",
 		})
-		return c.Redirect().To("/admin/panel")
+		c.Set("HX-Redirect", "/admin/panel")
+
+		return c.SendStatus(fiber.StatusOK)
 	}
 
 	user, mentor, err := authenticateUser(email, password)
@@ -75,7 +77,9 @@ func Handlelogin(c fiber.Ctx) error {
 			SameSite: "Strict",
 		})
 
-		return c.Redirect().To("/mentor/dashboard")
+		c.Set("HX-Redirect", "/mentor/dashboard")
+
+		return c.SendStatus(fiber.StatusOK)
 	}
 
 	token, err := generateJWT(user.Email, user.CollageID)
@@ -85,16 +89,30 @@ func Handlelogin(c fiber.Ctx) error {
 
 	c.Locals("user", user)
 
+	sess, err := store.Get(c)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to get session")
+	}
+	sess.Set("user_id", user.ID)
+	sess.Set("collage_id", user.CollageID)
+
+	if err := sess.Save(); err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to save session")
+	}
+
 	c.Cookie(&fiber.Cookie{
-		Name:     "jwt",
-		Value:    token,
-		Expires:  time.Now().Add(time.Hour * 1),
-		HTTPOnly: true,
-		Secure:   true,
-		SameSite: "Strict",
+		Name:        "jwt",
+		Value:       token,
+		Expires:     time.Now().Add(time.Hour * 1),
+		HTTPOnly:    true,
+		Secure:      true,
+		SameSite:    "Strict",
+		SessionOnly: true,
 	})
 
-	return c.Redirect().To("/student/dashboard")
+	c.Set("HX-Redirect", "/student/dashboard")
+
+	return c.SendStatus(fiber.StatusOK)
 
 }
 

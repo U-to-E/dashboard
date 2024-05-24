@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="mb-4">Quiz</h1>
+      <div class="alert alert-info">
+        Time left: <span id="timer">{{.TimeLeft}}</span> seconds
+      </div>
+      <form hx-post="/student/dashboard/submit/quiz">
+        <input type="hidden" value="{{ .SID }}" name="SID" />
+        <input type="hidden" value="{{ .QID }}" name="QID" />
+
+        <!-- Add action and method attributes -->
+        {{range $index, $quiz := .Quizzes}}
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title">{{$quiz.Question}}</h5>
+            {{range $optIndex, $option := $quiz.Options}}
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="answer[{{$index}}]"
+                id="option{{$optIndex}}"
+                value="{{$option}}"
+                onchange="saveSelectedOption({{$index}}, this.value)"
+              />
+              <label class="form-check-label" for="option{{$optIndex}}"
+                >{{$option}}</label
+              >
+            </div>
+            {{end}}
+          </div>
+        </div>
+        {{end}}
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <!-- Add submit button -->
+      </form>
+    </div>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+      // Timer script
+      let timer = parseFloat(document.getElementById('timer').innerText)
+      function formatTime(seconds) {
+        let minutes = Math.floor(seconds / 60)
+        let secs = Math.floor(seconds % 60)
+        return `${minutes}m ${secs}s`
+      }
+      document.getElementById('timer').innerText = formatTime(timer)
+      let interval = setInterval(function () {
+        timer--
+        document.getElementById('timer').innerText = formatTime(timer)
+        if (timer <= 0) {
+          clearInterval(interval)
+          document.forms[0].submit()
+        }
+      }, 1000)
+
+      function saveSelectedOption(questionIndex, selectedOption) {
+        sessionStorage.setItem(
+          'selected_option_' + questionIndex,
+          selectedOption
+        )
+      }
+
+      function loadSelectedOptions() {
+        document
+          .querySelectorAll('.card-body')
+          .forEach(function (cardBody, questionIndex) {
+            var selectedOption = sessionStorage.getItem(
+              'selected_option_' + questionIndex
+            )
+            if (selectedOption !== null) {
+              cardBody
+                .querySelectorAll('.form-check-input')
+                .forEach(function (input) {
+                  if (input.value === selectedOption) {
+                    input.checked = true
+                  }
+                })
+            }
+          })
+      }
+
+      window.onload = function () {
+        loadSelectedOptions()
+      }
+
+      function clearSelectedOptions() {
+        document
+          .querySelectorAll('.card-body')
+          .forEach(function (cardBody, questionIndex) {
+            sessionStorage.removeItem('selected_option_' + questionIndex)
+          })
+      }
+    </script>
+  </body>
+</html>

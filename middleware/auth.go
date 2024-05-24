@@ -10,7 +10,7 @@ func Protected(c fiber.Ctx) error {
 	token := c.Cookies("jwt")
 
 	if token == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized. Please Login"})
 	}
 
 	claims := &jwt.StandardClaims{}
@@ -19,13 +19,8 @@ func Protected(c fiber.Ctx) error {
 	})
 
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized. Please Login"})
 	}
 
-	// userEmail := claims.Issuer
-	// var user models.Student
-	// // database.DB.Table(claims.Id).Where("email = ?", claims.Issuer).First(&user, userEmail)
-
-	// c.Locals("user", user)
 	return c.Next()
 }

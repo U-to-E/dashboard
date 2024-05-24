@@ -114,7 +114,7 @@
           <div class="dropdown-menu">
             <a href="#">My Profile</a>
             <a href="#">Settings</a>
-            <a href="#">Logout</a>
+            <a hx-post="/logout">Logout</a>
           </div>
         </div>
       </div>
@@ -164,15 +164,46 @@
               </div>
               <div class="upload-card">
                 <h2>Upload Mock Test</h2>
-                <form action="#" method="post" enctype="multipart/form-data">
+                <form
+                  hx-post="/mentor/dashboard/quiz/add"
+                  enctype="multipart/form-data"
+                >
+                  <input
+                    type="text"
+                    name="Qduration"
+                    placeholder="Quiz Duration"
+                  />
+                  <input type="text" name="Qname" placeholder="Quiz name" />
+                  <input
+                    name="mentorId"
+                    value="{{ $.User.ID }}"
+                    type="hidden"
+                  />
                   <input
                     type="file"
-                    name="mockTest"
+                    name="quizfile"
                     id="mockTest"
                     accept=".pdf, .doc, .docx"
                   />
                   <input type="submit" value="Upload Mock Test" />
                 </form>
+              </div>
+              <div class="upload-card">
+                <h2>Uploaded Quizes</h2>
+                {{ range .Quiz}}
+                <form hx-post="/mentor/dashboard/quiz/delete">
+                  <p>{{ .Name }}</p>
+                  <input type="hidden" name="file" value="{{ .Name }}" />
+                  <input
+                    type="hidden"
+                    name="mentorId"
+                    value="{{ $.User.ID }}"
+                  />
+
+                  <button>Delete</button>
+                </form>
+
+                {{ end }}
               </div>
             </div>
           </div>

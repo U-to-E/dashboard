@@ -165,8 +165,9 @@
           hx-post="/login"
           hx-trigger="submit"
           HX-Refesh="true"
+          hx-ext="response-targets"
           hx-ext="redirectToResponseUrl"
-          hx-target="#errors"
+          hx-target-error="#errors"
         >
           <h1 id="errors"></h1>
           <div class="flex-column">
@@ -244,18 +245,13 @@
     </div>
   </body>
 
+  <script src="https://unpkg.com/htmx.org/dist/ext/response-targets.js"></script>
   <script>
     htmx.defineExtension('redirectToResponseUrl', {
       transformResponse: function (text, xhr) {
         globalThis.document.location = xhr.responseURL
         return 'Redirecting...'
       },
-    })
-    document.body.addEventListener('htmx:responseError', (evt) => {
-      if (evt.detail.xhr.status === 401) {
-        document.getElementById('errors').innerHTML =
-          'Invalid Email or password'
-      }
     })
   </script>
 </html>

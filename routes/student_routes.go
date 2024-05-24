@@ -17,6 +17,9 @@ func SetupStudentRoutes(app *fiber.App) {
 	admin.Get("/panel", controller.RenderAdmin, middleware.ProtectedAdmin)
 	admin.Get("/panel/collage/:id", controller.GetStudentList, middleware.ProtectedAdmin)
 	student.Get("/dashboard", controller.RenderDashboard, middleware.Protected)
+	student.Get("/dashboard/quiz", controller.QuizPage, middleware.Protected)
+	student.Get("/dashboard/marks", controller.RenderMarks, middleware.Protected)
+
 	mentor.Get("/dashboard", controller.RenderMentorDash, middleware.MentorProtected)
 
 	//POST
@@ -31,5 +34,7 @@ func SetupStudentRoutes(app *fiber.App) {
 	admin.Post("/panel/mentormapping", controller.MapMentorToCollage, middleware.ProtectedAdmin)
 	mentor.Post("/dashboard/material/add", controller.PostMaterial, middleware.MentorProtected)
 	mentor.Post("/dashboard/material/delete", controller.DeleteMaterial, middleware.MentorProtected)
+	mentor.Post("/dashboard/quiz/add", controller.CreateQuiz, middleware.MentorProtected)
+	student.Post("/dashboard/submit/quiz", controller.SubmitQuiz, middleware.Protected)
 
 }

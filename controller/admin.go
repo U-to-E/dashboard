@@ -53,7 +53,7 @@ func AddStudent(c fiber.Ctx) error {
 		})
 	}
 
-	for _, record := range records {
+	for _, record := range records[1:] {
 		if len(record) != 5 {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Invalid parameters in CSV file",
@@ -104,6 +104,14 @@ func AddStudent(c fiber.Ctx) error {
 			}
 
 		}
+		err = os.Mkdir("./quiz/"+record[3]+"-"+record[4], 0755)
+
+		if err != nil {
+			if !os.IsExist(err) {
+				return c.SendString("Error creating a DIR")
+			}
+
+		}
 
 	}
 
@@ -134,7 +142,7 @@ func AddMentor(c fiber.Ctx) error {
 		})
 	}
 
-	for _, record := range records {
+	for _, record := range records[1:] {
 		if len(record) != 3 {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Invalid parameters in CSV file",

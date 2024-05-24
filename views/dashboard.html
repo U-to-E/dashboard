@@ -1267,7 +1267,7 @@
 
           <div class="side-pane d-flex flex-column" id="sidePane">
             <div class="content">
-              <button><a href="student-mock-marks.html">Mock Marks</a></button>
+              <button><a href="/student/dashboard/marks">Mock Marks</a></button>
               <a>Student details</a>
               <button id="modalButton"><a>Mentor Details</a></button>
 
@@ -1300,8 +1300,11 @@
                 <p>{{ .Name }}</p>
                 <p>📖 LEARNING ⏰ 30Mins</p>
                 <button class="continue_button">
-                  <a href="{{ .FilePath }}" download="{{ .Name }}"
-                    >Continue →</a
+                  <a
+                    href="{{ .FilePath }}"
+                    download="{{ .Name }}"
+                    style="color: white; text-decoration: none"
+                    >Download →</a
                   >
                 </button>
               </div>
@@ -1316,26 +1319,20 @@
           <div class="">
             <h1 class="heading">Mock Tests</h1>
             <div class="Study-materials-grid">
+              {{ if .Quiz}} {{ range .Quiz}}
               <div class="study-material-card rounded-lg shadow">
-                <h2 class="font-bold">Mock test - 1</h2>
-                <p>test - 1</p>
-                <p>📖 Practise ⏰ 50Mins</p>
-                <button class="continue_button">Continue →</button>
+                <form hx-get="/student/dashboard/quiz">
+                  <input type="hidden" name="QID" value="{{ .QuizID }}" />
+                  <input type="hidden" name="SID" value="{{ $.SID }}" />
+                  <h2 class="font-bold">{{ .Name }}</h2>
+                  <!-- <p>test - 1</p> -->
+                  <p>📖 Practise ⏰ {{ .Duration }} min</p>
+                  <button class="continue_button">Continue →</button>
+                </form>
               </div>
-
-              <div class="study-material-card rounded-lg shadow">
-                <h2 class="font-bold">Mock test - 2</h2>
-                <p>test - 1</p>
-                <p>📖 Practise ⏰ 50Mins</p>
-                <button class="continue_button">Continue →</button>
-              </div>
-
-              <div class="study-material-card rounded-lg shadow">
-                <h2 class="font-bold">Mock test - 3</h2>
-                <p>test - 1</p>
-                <p>📖 Practise ⏰ 50Mins</p>
-                <button class="continue_button">Continue →</button>
-              </div>
+              {{ end }} {{ else }}
+              <h4>No Mock Tests</h4>
+              {{ end }}
             </div>
           </div>
         </div>
