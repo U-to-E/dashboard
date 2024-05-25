@@ -3,12 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Student List</title>
     <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
   </head>
   <body>
-    Hi Admin!
-
     <h1>Student List</h1>
 
     <table>
@@ -35,31 +33,58 @@
         <td>
           <button
             data-hx-target="#edit-form"
-            data-hx-swap="outerHTML swap:outerHTML->beforeSwap"
-            data-hx-values='{"cellValue":"{{ .Name }}", "rowId":"{{ .ID }}"}'
+            data-hx-swap="beforeend"
+            data-hx-trigger="click"
+            data-hx-get="/edit-student/{{ .ID }}"
+            data-hx-indicator=".htmx-indicator"
           >
             Edit
           </button>
         </td>
-        <td><button>Delete</button></td>
+        <td>
+          <button
+            hx-delete="/delete-student/{{ .ID }}"
+            hx-confirm="Are you sure you want to delete this student?"
+          >
+            Delete
+          </button>
+        </td>
       </tr>
       {{ end }}
     </table>
 
     <button hx-post="/logout" hx-ext="redirectToResponseUrl">Log out</button>
 
-    <div id="edit-form" style="display: block">
-      <input type="text" id="edit-input" />
-      <button
-        hx-post="/update-student"
-        hx-target="closest tr td[data-hx-target='this']"
-        hx-swap="outerHTML"
-        hx-include="PARENT_CLOSEST(tr)"
-        data-hx-values='{"rowId":"<rowId>"}'
-      >
-        Save
-      </button>
-      <button id="cancel-edit">Cancel</button>
+    <div id="edit-form" style="display: none">
+      <form hx-post="/update-student" hx-target="this" hx-swap="outerHTML">
+        <input type="hidden" name="student_id" id="student-id" />
+        <label>
+          Name:
+          <input type="text" name="name" id="edit-name" required />
+        </label>
+        <label>
+          Email:
+          <input type="email" name="email" id="edit-email" required />
+        </label>
+        <label>
+          College ID:
+          <input type="text" name="college_id" id="edit-college-id" required />
+        </label>
+        <label>
+          Mentor ID:
+          <input type="text" name="mentor_id" id="edit-mentor-id" required />
+        </label>
+        <label>
+          Level:
+          <input type="text" name="level" id="edit-level" required />
+        </label>
+        <label>
+          Marks:
+          <input type="number" name="marks" id="edit-marks" required />
+        </label>
+        <button type="submit">Save</button>
+        <button type="button" id="cancel-edit">Cancel</button>
+      </form>
     </div>
 
     <script src="https://unpkg.com/htmx.org/dist/htmx.js"></script>
@@ -67,24 +92,29 @@
       htmx.defineExtension('redirectToResponseUrl', {
         transformResponse: function (text, xhr) {
           globalThis.document.location = xhr.responseURL
-          return 'Logging out....'
+          return 'Logging out...'
         },
       })
 
-      document.addEventListener('htmx:beforeSwap', function (event) {
-        if (event.target.matches('[data-hx-target="#edit-form"]')) {
-          event.detail.shouldSwap = false
-          const editForm = document.getElementById('edit-form')
-          const cellValue =
-            event.target.getAttribute('data-hx-values')?.cellValue
-          const rowId = event.target.getAttribute('data-hx-values')?.rowId
-          const editInput = document.getElementById('edit-input')
-          editInput.value = cellValue
-          const saveButton = editForm.querySelector(
-            'button[hx-post="/update-student"]'
-          )
-          saveButton.dataset.hxValues = `{"rowId":"${rowId}"}`
-          editForm.style.display = 'block'
+      document.addEventListener('htmx:configRequest', function (event) {
+        const form = event.target.closest('form')
+        if (form && form.id === 'edit-form') {
+          const studentId = form.querySelector('#student-id').value
+          const name = form.querySelector('#edit-name').value
+          const email = form.querySelector('#edit-email').value
+          const collegeId = form.querySelector('#edit-college-id').value
+          const mentorId = form.querySelector('#edit-mentor-id').value
+          const level = form.querySelector('#edit-level').value
+          const marks = form.querySelector('#edit-marks').value
+          event.detail.parameters = {
+            student_id: studentId,
+            name: name,
+            email: email,
+            college_id: collegeId,
+            mentor_id: mentorId,
+            level: level,
+            marks: marks,
+          }
         }
       })
 

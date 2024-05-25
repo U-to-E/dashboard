@@ -88,7 +88,7 @@ func RenderDashboard(c fiber.Ctx) error {
 	}
 
 	return c.Render("dashboard", fiber.Map{
-		"User":      student.Name,
+		"User":      student,
 		"SID":       student.ID,
 		"Level":     student.Level,
 		"Marks":     student.Marks,

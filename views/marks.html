@@ -13,30 +13,15 @@
     <style>
       .mock-marks-section {
         background-color: aliceblue;
-        height: 100vh;
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
+        min-height: 100vh;
       }
 
       .mock-marks-card {
-        background-color: #ffffff;
         border-radius: 15px;
-        height: 350px;
-        width: 300px;
-        margin: 20px;
-        padding: 20px;
       }
 
       .mock-heading {
         text-align: center;
-        margin-bottom: 20px;
-      }
-
-      .mock-marks-card p {
-        margin: 5px 0;
       }
     </style>
   </head>
@@ -44,27 +29,36 @@
     <nav class="navbar navbar-light bg-light">
       <a class="navbar-brand" href="#">
         <img
-          src="UtoElogo.png"
+          src="/asserts/UtoElogo.png"
           width="70"
           height="70"
           class="d-inline-block align-top ml-3"
-          alt=""
+          alt="Logo"
         />
       </a>
     </nav>
 
-    <div class="container mock-marks-section">
-      {{ range .Marks }}
-      <div class="mock-marks-card">
-        <h6 class="mock-heading">Mock Test - {{ .QuizName }}</h6>
-        <hr />
-        <p>Correct answers - {{ .CorrectQuestions }}</p>
-        <p>Wrong answers - {{ .TotalQuestions }}</p>
-        <p>Unanswered - {{ .CorrectQuestions }}</p>
-
-        <p>Total marks</p>
+    <div class="container mock-marks-section py-5">
+      <div class="row justify-content-center">
+        {{ range .Marks }}
+        <div class="col-md-4 col-sm-6 mb-4">
+          <div class="card mock-marks-card shadow-sm h-100">
+            <div class="card-body">
+              <h6 class="mock-heading">{{ .QuizName }}</h6>
+              <hr />
+              <p>Total Question: {{ .TotalQuestions }}</p>
+              <p>Correct answers: {{ .CorrectQuestions }}</p>
+            </div>
+          </div>
+        </div>
+        {{ end }}
       </div>
-      {{ end }}
     </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-A3oA6K11qvV0JL5MS2yzBPOk7z90F9OsCl1rqW49YKHxrV6oBP5/A01Zw5yNOmka"
+      crossorigin="anonymous"
+    ></script>
   </body>
 </html>

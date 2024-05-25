@@ -108,7 +108,7 @@
   <body>
     <div>
       <div class="navbar">
-        <div><img class="logo" src="UtoElogo.png" /></div>
+        <div><img class="logo" src="/asserts/UtoElogo.png" /></div>
         <div class="profile-icon">
           &#9776;
           <div class="dropdown-menu">
@@ -211,23 +211,25 @@
           <div class="Assigned-Students col-12 col-md-4">
             {{range .Students}}
             <div class="student-card">
-              <div class="student-name-box">
-                <p class="student-name">{{ .Name }}</p>
-                <span style="font-size: 30px">&#8594;</span>
-              </div>
-
-              <div class="progress">
-                <div
-                  class="progress-bar"
-                  role="progressbar"
-                  style="width: {{ .Level }}"
-                  aria-valuenow="{{ .Level }}"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                >
-                  {{ .Level }}
+              <a href="/mentor/dashboard/{{ .CollageID }}-{{.ID}}">
+                <div class="student-name-box">
+                  <p class="student-name">{{ .Name }}</p>
+                  <span style="font-size: 30px">&#8594;</span>
                 </div>
-              </div>
+
+                <div class="progress">
+                  <div
+                    class="progress-bar"
+                    role="progressbar"
+                    style="width: {{ .Level }}"
+                    aria-valuenow="{{ .Level }}"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  >
+                    {{ .Level }}
+                  </div>
+                </div>
+              </a>
             </div>
             {{ end }}
           </div>

@@ -19,7 +19,7 @@ func SetupStudentRoutes(app *fiber.App) {
 	student.Get("/dashboard", controller.RenderDashboard, middleware.Protected)
 	student.Get("/dashboard/quiz", controller.QuizPage, middleware.Protected)
 	student.Get("/dashboard/marks", controller.RenderMarks, middleware.Protected)
-
+	mentor.Get("/dashboard/:id", controller.GetStudentPage, middleware.MentorProtected)
 	mentor.Get("/dashboard", controller.RenderMentorDash, middleware.MentorProtected)
 
 	//POST
@@ -36,5 +36,8 @@ func SetupStudentRoutes(app *fiber.App) {
 	mentor.Post("/dashboard/material/delete", controller.DeleteMaterial, middleware.MentorProtected)
 	mentor.Post("/dashboard/quiz/add", controller.CreateQuiz, middleware.MentorProtected)
 	student.Post("/dashboard/submit/quiz", controller.SubmitQuiz, middleware.Protected)
+	mentor.Post("/dashboard/level/set/:id", controller.SetLevel, middleware.MentorProtected)
+	mentor.Post("/dashboard/cert/upload/:id", controller.UploadCert, middleware.MentorProtected)
+	mentor.Post("/dashboard/cert/delete/:id", controller.DeleteCert, middleware.MentorProtected)
 
 }

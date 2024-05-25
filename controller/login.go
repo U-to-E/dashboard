@@ -68,6 +68,16 @@ func Handlelogin(c fiber.Ctx) error {
 
 		c.Locals("mentor", mentor)
 
+		sess, err := store.Get(c)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).SendString("Failed to get session")
+		}
+		sess.Set("mentor_id", mentor.ID)
+
+		if err := sess.Save(); err != nil {
+			return c.Status(fiber.StatusInternalServerError).SendString("Failed to save session")
+		}
+
 		c.Cookie(&fiber.Cookie{
 			Name:     "jwt",
 			Value:    token,

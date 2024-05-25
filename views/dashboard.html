@@ -279,7 +279,7 @@
         <div class="Progress-section d-none d-md-block">
           <div class="">
             <div class="d-flex flex-row justify-content-center">
-              <img class="Logo" src="UtoElogo.png" />
+              <img class="Logo" src="/asserts/UtoElogo.png" />
             </div>
             <h3 class="text-center mb-4">My Progress</h3>
             <div style="margin-left: 10px">
@@ -742,7 +742,12 @@
                     </ul>
                   </div>
                   <button class="progress-button mt-4">
-                    Get your certificate
+                    <a
+                      href="/cert/{{ .User.CollageID }}-{{ .User.ID}}.pdf"
+                      download="{{ .User.CollageID }}-{{ .User.ID}}.pdf"
+                    >
+                      Get your certificate
+                    </a>
                   </button>
                   {{ end }}
                 </ul>
@@ -768,7 +773,7 @@
               </svg>
             </div>
             <h1 class="text-3xl mb-4">
-              Welcome <span class="student_name">{{ .User }}</span> 👋
+              Welcome <span class="student_name">{{ .User.Name }}</span> 👋
             </h1>
             <div class="d-flex flex-row">
               <div class="icon-btn" onclick="openSidePane()">
@@ -1252,7 +1257,12 @@
                       </ul>
                     </div>
                     <button class="progress-button mt-4">
-                      Get your certificate
+                      <a
+                        href="/cert/{{ .User.CollageID }}-{{ .User.ID}}.pdf"
+                        download="{{.User.CollageID }}-{{ .User.ID}}.pdf"
+                      >
+                        Get your certificate
+                      </a>
                     </button>
                     {{ end }}
                   </ul>

@@ -58,10 +58,8 @@ func QuizPage(c fiber.Ctx) error {
 	QID := c.Query("QID")
 	SID := c.Query("SID")
 
-	// Redirect setup (if needed)
 	c.Set("HX-Redirect", "/student/dashboard/quiz?QID="+QID+"&SID="+SID)
 
-	// Retrieve user ID from session
 	sess, err := store.Get(c)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to get session")
@@ -73,7 +71,6 @@ func QuizPage(c fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized. Please Login"})
 	}
 
-	// Convert SID to integer
 	SIDInt, err := strconv.Atoi(SID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid Student ID format"})
@@ -87,7 +84,6 @@ func QuizPage(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString("QID is required")
 	}
 
-	// Check if the student has already completed the quiz
 	var count int64
 	err = database.DB.Table("marks").
 		Where("student_id = ? AND quiz_id = ?", SID, QID).
@@ -101,14 +97,12 @@ func QuizPage(c fiber.Ctx) error {
 		return c.Status(fiber.StatusConflict).SendString("Quiz already completed")
 	}
 
-	// Fetch quiz details
 	var quiz models.Quiz
 	err = database.DB.Table("quizzes").Where("quiz_id = ?", QID).First(&quiz).Error
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to fetch quiz details")
 	}
 
-	// Parse quiz duration
 	value, err := strconv.Atoi(quiz.Duration)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid duration value")

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx"
+      crossorigin="anonymous"
+    />
+    <title>Student Marks</title>
+    <style>
+      .mock-marks-section {
+        background-color: aliceblue;
+        min-height: 100vh;
+      }
+
+      .mock-marks-card {
+        border-radius: 15px;
+      }
+
+      .mock-heading {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-light bg-light">
+      <a class="navbar-brand" href="#"> </a>
+    </nav>
+
+    <div class="container mock-marks-section py-5">
+      <form
+        hx-post="/mentor/dashboard/level/set/{{ .Student.CollageID}}-{{ .Student.ID }}"
+      >
+        <div class="row mb-4">
+          <div class="col-12 text-center">
+            <h1>Student Marks</h1>
+            <p>Name: {{ .Student.Name }}</p>
+            <p>ID: {{ .Student.ID }}</p>
+            <p>Level: {{ .Student.Level }}</p>
+          </div>
+        </div>
+
+        <input
+          type="text"
+          name="level"
+          placeholder="Enter the level to be set"
+        />
+        <button>Set Level</button>
+      </form>
+      <div>
+        <h2>Certificate</h2>
+        <form
+          hx-post="/mentor/dashboard/cert/upload/{{ .Student.CollageID}}-{{ .Student.ID }}"
+          hx-trigger="submit"
+          enctype="multipart/form-data"
+        >
+          <input type="file" name="cert" id="cert" accept=".pdf" />
+          <input type="submit" value="Upload certificate" />
+        </form>
+
+        {{ if .CertExists }}
+        <p>Certificate Uploaded</p>
+        {{ .CertPath }}
+        <form
+          hx-post="/mentor/dashboard/cert/delete/{{ .Student.CollageID }}-{{ .Student.ID }}"
+          hx-trigger="submit"
+        >
+          <button type="submit">Delete certificate</button>
+        </form>
+        {{ else }}
+        <p>No certificate Not uploaded.</p>
+        {{ end }}
+      </div>
+
+      <div class="row justify-content-center">
+        {{ range .Marks }}
+        <div class="col-md-4 col-sm-6 mb-4">
+          <div class="card mock-marks-card shadow-sm h-100">
+            <div class="card-body d-flex flex-column">
+              <h6 class="mock-heading">{{ .QuizName }}</h6>
+              <hr />
+              <p>Correct answers: {{ .CorrectQuestions }}</p>
+              <p>Total marks: {{ .TotalQuestions }}</p>
+            </div>
+          </div>
+        </div>
+        {{ end }}
+      </div>
+    </div>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-A3oA6K11qvV0JL5MS2yzBPOk7z90F9OsCl1rqW49YKHxrV6oBP5/A01Zw5yNOmka"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

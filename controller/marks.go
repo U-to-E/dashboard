@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/U-to-E/dashboard/database"
@@ -29,7 +28,6 @@ func RenderMarks(c fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to fetch marks")
 	}
-	fmt.Println(marks)
 	return c.Render("marks", fiber.Map{
 		"Marks": marks,
 	})

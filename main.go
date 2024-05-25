@@ -31,6 +31,9 @@ func main() {
 	controller.Session(store)
 
 	app.Static("/", "./materials")
+	app.Static("/asserts", "./static")
+	app.Static("/cert", "./certificates")
+	// app.Get("/metrics", monitor.New())
 	// app.Use(csrf.New())
 	// app.Use(csrf.New(csrf.Config{
 	// 	KeyLookup:      "header:X-Csrf-Token",
