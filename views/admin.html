@@ -1,269 +1,129 @@
 <!doctype html>
-<html lang="en" class="sl-theme-dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Dashboard</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.1/cdn/themes/light.css"
-    />
-    <script
-      type="module"
-      src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.1/cdn/shoelace-autoloader.js"
-    ></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.1/cdn/themes/dark.css"
-    />
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .container {
-        max-width: 1200px;
-        width: 100%;
-        padding: 20px;
-      }
-
-      h1 {
-        font-weight: 600;
-        margin-bottom: 20px;
-      }
-
-      form {
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-      }
-
-      sl-input,
-      sl-select {
-        display: block;
-        margin-bottom: 15px;
-      }
-
-      sl-button {
-        margin-top: 10px;
-      }
-
-      .logout-button {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-      }
-
-      .section {
-        margin-bottom: 40px;
-      }
-
-      .loading-spinner {
-        display: none;
-        position: absolute;
-        right: 20px;
-        top: 20px;
-      }
-
-      .loading-spinner.show {
-        display: block;
-      }
-    </style>
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
   </head>
   <body>
-    <sl-spinner class="loading-spinner" id="loadingSpinner"></sl-spinner>
-    <sl-button
-      variant="danger"
-      class="logout-button"
-      hx-post="/logout"
-      hx-ext="redirectToResponseUrl"
-      >Log out</sl-button
+    Hi Admin!
+
+    <h1>Student Bulk Register</h1>
+
+    <form
+      id="studentForm"
+      enctype="multipart/form-data"
+      hx-post="/admin/panel/register/student"
     >
+      <input type="file" name="file" id="file" />
+      <button type="submit">Submit</button>
+    </form>
 
-    <div class="container">
-      <div class="section">
-        <h1>Student Bulk Register</h1>
-        <form
-          id="studentFormBulk"
-          enctype="multipart/form-data"
-          hx-post="/admin/panel/register/student"
-          hx-target="#studentFormBulk"
-          hx-trigger="submit"
-        >
-          <sl-input
-            type="file"
-            name="file"
-            id="file"
-            label="Upload CSV File"
-          ></sl-input>
-          <sl-button type="submit" variant="primary">Submit</sl-button>
-        </form>
-      </div>
+    <h1>Student Register</h1>
+    <form
+      id="studentForm"
+      enctype="multipart/form-data"
+      hx-post="/admin/panel/register/singlestudent"
+    >
+      <input
+        type="text"
+        name="name"
+        id="Name"
+        placeholder="Name of the Student"
+      />
+      <input type="text" name="email" id="Name" placeholder="Email" />
+      <input
+        type="text"
+        name="password"
+        id="Name"
+        placeholder="Password Hash"
+      />
+      <input type="text" name="collageID" id="Name" placeholder="Collage ID" />
+      <input type="text" name="mentorID" id="Name" placeholder="Mentor ID" />
+      <button type="submit">Submit</button>
+    </form>
 
-      <div class="section">
-        <h1>Student Register</h1>
-        <form
-          id="studentFormSingle"
-          enctype="multipart/form-data"
-          hx-post="/admin/panel/register/singlestudent"
-          hx-target="#studentFormSingle"
-          hx-trigger="submit"
-        >
-          <sl-input
-            label="Name of the Student"
-            name="name"
-            id="Name"
-            placeholder="Name of the Student"
-          ></sl-input>
-          <sl-input
-            label="Email"
-            name="email"
-            id="Email"
-            placeholder="Email"
-          ></sl-input>
-          <sl-input
-            label="Password Hash"
-            name="password"
-            id="Password"
-            placeholder="Password Hash"
-          ></sl-input>
-          <sl-input
-            label="College ID"
-            name="collageID"
-            id="CollegeID"
-            placeholder="College ID"
-          ></sl-input>
-          <sl-button type="submit" variant="primary">Submit</sl-button>
-        </form>
-      </div>
+    <h1>Mentor Bulk Register</h1>
+    <form
+      id="mentorForm"
+      enctype="multipart/form-data"
+      hx-post="/admin/panel/register/mentor"
+    >
+      <input type="file" name="file" id="file" />
+      <button type="submit">Submit</button>
+    </form>
+    <h1>Mentor Register</h1>
+    <form
+      id="studentForm"
+      enctype="multipart/form-data"
+      hx-post="/admin/panel/register/singlementor"
+    >
+      <input
+        type="text"
+        name="name"
+        id="Name"
+        placeholder="Name of the Mentor"
+      />
+      <input type="text" name="email" id="Name" placeholder="Email" />
+      <input
+        type="text"
+        name="password"
+        id="Name"
+        placeholder="Password Hash"
+      />
+      <input
+        type="number"
+        name="phnumber"
+        id="Name"
+        placeholder="Phone Number"
+      />
+      <button type="submit">Submit</button>
+    </form>
 
-      <div class="section">
-        <h1>Mentor Bulk Register</h1>
-        <form
-          id="mentorFormBulk"
-          enctype="multipart/form-data"
-          hx-post="/admin/panel/register/mentor"
-          hx-target="#mentorFormBulk"
-          hx-trigger="submit"
-        >
-          <sl-input
-            type="file"
-            name="file"
-            id="file"
-            label="Upload CSV File"
-          ></sl-input>
-          <sl-button type="submit" variant="primary">Submit</sl-button>
-        </form>
-      </div>
+    <h1>Password Hash Generator</h1>
+    <form
+      id="passForm"
+      enctype="multipart/form-data"
+      hx-post="/admin/panel/password/gen"
+    >
+      <input type="text" name="password" id="password" />
+      <button type="submit">Submit</button>
+    </form>
+    <h1>Edit student list</h1>
 
-      <div class="section">
-        <h1>Mentor Register</h1>
-        <form
-          id="mentorFormSingle"
-          enctype="multipart/form-data"
-          hx-post="/admin/panel/register/singlementor"
-          hx-target="#mentorFormSingle"
-          hx-trigger="submit"
-        >
-          <sl-input
-            label="Name of the Mentor"
-            name="name"
-            id="Name"
-            placeholder="Name of the Mentor"
-          ></sl-input>
-          <sl-input
-            label="Email"
-            name="email"
-            id="Email"
-            placeholder="Email"
-          ></sl-input>
-          <sl-input
-            label="Password Hash"
-            name="password"
-            id="Password"
-            placeholder="Password Hash"
-          ></sl-input>
-          <sl-input
-            label="Phone Number"
-            type="number"
-            name="phnumber"
-            id="PhoneNumber"
-            placeholder="Phone Number"
-          ></sl-input>
-          <sl-button type="submit" variant="primary">Submit</sl-button>
-        </form>
-      </div>
+    <form
+      hx-post="/admin/panel/collage/id"
+      hx-trigger="submit"
+      hx-refresh="true"
+      hx-ext="ResponseUrl"
+    >
+      <select name="collageId">
+        <option value="">Select a Collage ID</option>
+        {{ range .Table }}
+        <option value="{{ .TableName }}">{{ .TableName }}</option>
+        {{ end }}
+      </select>
+      <button type="submit">Submit</button>
+    </form>
+    <h1>Mentor mapping to collage</h1>
+    <form hx-post="/admin/panel/mentormapping" hx-trigger="submit">
+      <input
+        type="text"
+        name="mentorID"
+        id=""
+        placeholder="Enter mentor ID to map to a collage"
+      />
+      <select name="collageId">
+        <option value="">Select a Collage ID</option>
+        {{ range .Table }}
+        <option value="{{ .TableName }}">{{ .TableName }}</option>
+        {{ end }}
+      </select>
+      <button type="submit">Submit</button>
+    </form>
 
-      <div class="section">
-        <h1>Password Hash Generator</h1>
-        <form
-          id="passForm"
-          enctype="multipart/form-data"
-          hx-post="/admin/panel/password/gen"
-          hx-target="#passForm"
-          hx-trigger="submit"
-        >
-          <sl-input
-            label="Password"
-            name="password"
-            id="password"
-            placeholder="Password"
-          ></sl-input>
-          <sl-button type="submit" variant="primary">Submit</sl-button>
-        </form>
-      </div>
-
-      <div class="section">
-        <h1>Edit Student List</h1>
-        <form
-          hx-post="/admin/panel/collage/id"
-          hx-trigger="submit"
-          hx-target="#editStudentList"
-          hx-refresh="true"
-          hx-ext="ResponseUrl"
-        >
-          <sl-select label="Select a College ID" name="collageId">
-            <sl-option value="">Select a College ID</sl-option>
-            {{ range .Table }}
-            <sl-option value="{{ .TableName }}">{{ .TableName }}</sl-option>
-            {{ end }}
-          </sl-select>
-          <sl-button type="submit" variant="primary">Submit</sl-button>
-        </form>
-      </div>
-
-      <div class="section">
-        <h1>Mentor Mapping to College</h1>
-        <form
-          id="mentorMappingForm"
-          hx-post="/admin/panel/mentormapping"
-          hx-trigger="submit"
-          hx-target="#mentorMappingForm"
-        >
-          <sl-input
-            label="Enter Mentor ID to map to a College"
-            name="mentorID"
-            placeholder="Enter Mentor ID"
-          ></sl-input>
-          <sl-select label="Select a College ID" name="collageId">
-            <sl-option value="">Select a College ID</sl-option>
-            {{ range .Table }}
-            <sl-option value="{{ .TableName }}">{{ .TableName }}</sl-option>
-            {{ end }}
-          </sl-select>
-          <sl-button type="submit" variant="primary">Submit</sl-button>
-        </form>
-      </div>
-    </div>
+    <button hx-post="/logout" hx-ext="redirectToResponseUrl">Log out</button>
 
     <script src="https://unpkg.com/htmx.org/dist/htmx.js"></script>
     <script>
@@ -273,20 +133,11 @@
           return 'Logging out....'
         },
       })
-
       htmx.defineExtension('ResponseUrl', {
         transformResponse: function (text, xhr) {
           globalThis.document.location = xhr.responseURL
           return 'Loading....'
         },
-      })
-
-      document.body.addEventListener('htmx:configRequest', function (event) {
-        document.getElementById('loadingSpinner').classList.add('show')
-      })
-
-      document.body.addEventListener('htmx:afterRequest', function (event) {
-        document.getElementById('loadingSpinner').classList.remove('show')
       })
     </script>
   </body>

@@ -9,8 +9,6 @@ import (
 	"github.com/U-to-E/dashboard/models"
 	"github.com/gofiber/fiber/v3"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
 )
 
 type Table struct {
@@ -96,23 +94,20 @@ func AddStudent(c fiber.Ctx) error {
 			})
 		}
 
-		err := os.Mkdir("./materials/"+record[3]+"-"+record[4], 0755)
+		materialsDir := "./materials/" + record[3] + "-" + record[4]
+		quizDir := "./quiz/" + record[3] + "-" + record[4]
 
-		if err != nil {
-			if !os.IsExist(err) {
-				return c.SendString("Error creating a DIR")
-			}
-
-		}
-		err = os.Mkdir("./quiz/"+record[3]+"-"+record[4], 0755)
-
-		if err != nil {
-			if !os.IsExist(err) {
-				return c.SendString("Error creating a DIR")
-			}
-
+		if err := os.MkdirAll(materialsDir, 0755); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Error creating materials directory",
+			})
 		}
 
+		if err := os.MkdirAll(quizDir, 0755); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Error creating quiz directory",
+			})
+		}
 	}
 
 	return c.SendString("Students added successfully")
@@ -207,11 +202,11 @@ func CollageIDList() *[]Table {
 }
 
 func AddSingleStudent(c fiber.Ctx) error {
-
 	name := c.FormValue("name")
 	email := c.FormValue("email")
 	pass := c.FormValue("password")
 	cID := c.FormValue("collageID")
+	mentorID := c.FormValue("mentorID")
 
 	login := models.Login{
 		Name:      name,
@@ -225,7 +220,7 @@ func AddSingleStudent(c fiber.Ctx) error {
 		Name:      name,
 		Email:     email,
 		CollageID: cID,
-		MentorID:  "0",
+		MentorID:  mentorID,
 		Level:     1,
 		Marks:     0,
 	}
@@ -237,11 +232,7 @@ func AddSingleStudent(c fiber.Ctx) error {
 	}
 
 	if !database.DB.Migrator().HasTable(cID) {
-		err := database.DB.Migrator().CreateTable(&gorm.Config{
-			NamingStrategy: schema.NamingStrategy{
-				TablePrefix: cID + "_",
-			},
-		}, &models.Student{})
+		err := database.DB.Table(cID).Migrator().CreateTable(&models.Student{})
 		if err != nil {
 			panic("failed to create table")
 		}
@@ -252,9 +243,24 @@ func AddSingleStudent(c fiber.Ctx) error {
 			"error": "Error creating student record",
 		})
 	}
+
+	materialsDir := "./materials/" + cID
+	quizDir := "./quiz/" + cID
+
+	if err := os.MkdirAll(materialsDir, 0755); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error creating materials directory",
+		})
+	}
+
+	if err := os.MkdirAll(quizDir, 0755); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error creating quiz directory",
+		})
+	}
+
 	return c.SendString("Student added successfully")
 }
-
 func AddSingleMentor(c fiber.Ctx) error {
 	name := c.FormValue("name")
 	email := c.FormValue("email")
