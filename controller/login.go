@@ -73,6 +73,7 @@ func Handlelogin(c fiber.Ctx) error {
 			return c.Status(fiber.StatusInternalServerError).SendString("Failed to get session")
 		}
 		sess.Set("mentor_id", mentor.ID)
+		sess.Set("email", mentor.Email)
 
 		if err := sess.Save(); err != nil {
 			return c.Status(fiber.StatusInternalServerError).SendString("Failed to save session")
@@ -105,6 +106,7 @@ func Handlelogin(c fiber.Ctx) error {
 	}
 	sess.Set("user_id", user.ID)
 	sess.Set("collage_id", user.CollageID)
+	sess.Set("email", user.Email)
 
 	if err := sess.Save(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to save session")

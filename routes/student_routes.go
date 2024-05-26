@@ -14,6 +14,8 @@ func SetupStudentRoutes(app *fiber.App) {
 
 	//GET
 	app.Get("/", controller.RenderLogin)
+	app.Get("/forgot-password", controller.RenderForgotPass)
+	app.Get("/reset/password", controller.RenderResetPass)
 	admin.Get("/panel", controller.RenderAdmin, middleware.ProtectedAdmin)
 	admin.Get("/panel/collage/:id", controller.GetStudentList, middleware.ProtectedAdmin)
 	student.Get("/dashboard", controller.RenderDashboard, middleware.Protected)
@@ -21,10 +23,15 @@ func SetupStudentRoutes(app *fiber.App) {
 	student.Get("/dashboard/marks", controller.RenderMarks, middleware.Protected)
 	mentor.Get("/dashboard/:id", controller.GetStudentPage, middleware.MentorProtected)
 	mentor.Get("/dashboard", controller.RenderMentorDash, middleware.MentorProtected)
+	student.Get("/dashboard/changepass", controller.ChangePassPage, middleware.Protected)
+	mentor.Get("/dashboard/chanagepass", controller.ChangePassPage, middleware.MentorProtected)
 
 	//POST
 	app.Post("/login", controller.Handlelogin)
 	app.Post("/logout", controller.Logout, middleware.Protected)
+	app.Post("/forgot-password", controller.ForgotPassword)
+	app.Post("/reset/password", controller.ResetPassword)
+	app.Post("/reset-password", controller.ChangePassword, middleware.Protected)
 	admin.Post("/panel/register/student", controller.AddStudent, middleware.ProtectedAdmin)
 	admin.Post("/panel/register/mentor", controller.AddMentor, middleware.ProtectedAdmin)
 	admin.Post("/panel/register/singlestudent", controller.AddSingleStudent, middleware.ProtectedAdmin)

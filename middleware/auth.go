@@ -22,5 +22,7 @@ func Protected(c fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized. Please Login"})
 	}
 
+	c.Locals("claims", claims)
+
 	return c.Next()
 }

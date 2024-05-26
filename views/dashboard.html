@@ -1290,7 +1290,13 @@
                   <p>Emial Id : {{ .Mentor.Email }}</p>
                 </div>
               </div>
-
+              <button>
+                <a
+                  href="/student/dashboard/changepass"
+                  style="text-decoration: none; color: black"
+                  >Change password</a
+                >
+              </button>
               <button hx-post="/logout" hx-ext="redirectToResponseUrl">
                 Logout
               </button>

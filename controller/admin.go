@@ -57,6 +57,12 @@ func AddStudent(c fiber.Ctx) error {
 				"error": "Invalid parameters in CSV file",
 			})
 		}
+		var mentor models.Mentor
+		if err := database.DB.Table("mentors").Where("id = ? AND collage_id = ?", record[4], record[3]).First(&mentor).Error; err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Mentor not assigned to this collage",
+			})
+		}
 
 		login := models.Login{
 			Name:      record[0],
@@ -73,12 +79,6 @@ func AddStudent(c fiber.Ctx) error {
 			MentorID:  record[4],
 			Level:     1,
 			Marks:     0,
-		}
-
-		if err := database.DB.Table("logins").Create(&login).Error; err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Error creating student login",
-			})
 		}
 
 		if !database.DB.Migrator().HasTable(record[3]) {
@@ -106,6 +106,12 @@ func AddStudent(c fiber.Ctx) error {
 		if err := os.MkdirAll(quizDir, 0755); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "Error creating quiz directory",
+			})
+		}
+
+		if err := database.DB.Table("logins").Create(&login).Error; err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Error creating student login",
 			})
 		}
 	}
@@ -224,10 +230,10 @@ func AddSingleStudent(c fiber.Ctx) error {
 		Level:     1,
 		Marks:     0,
 	}
-
-	if err := database.DB.Table("logins").Create(&login).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Error creating student login",
+	var mentor models.Mentor
+	if err := database.DB.Table("mentors").Where("id = ? AND collage_id = ?", mentorID, cID).First(&mentor).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Mentor not assigned to this collage",
 		})
 	}
 
@@ -256,6 +262,12 @@ func AddSingleStudent(c fiber.Ctx) error {
 	if err := os.MkdirAll(quizDir, 0755); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Error creating quiz directory",
+		})
+	}
+
+	if err := database.DB.Table("logins").Create(&login).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error creating student login",
 		})
 	}
 
