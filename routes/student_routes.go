@@ -44,6 +44,7 @@ func SetupStudentRoutes(app *fiber.App) {
 	admin.Post("/panel/collage/id", controller.PostCID, middleware.ProtectedAdmin)
 	admin.Post("/panel/mentormapping", controller.MapMentorToCollage, middleware.ProtectedAdmin)
 	admin.Post("/panel/update-student", controller.UpdateStudent, middleware.ProtectedAdmin)
+	admin.Post("/panel/createcollage", controller.CreateCollageID, middleware.ProtectedAdmin)
 	admin.Delete("/panel/delete-student/:CID-:SID", controller.DeleteStudent, middleware.ProtectedAdmin)
 	admin.Delete("/panel/delete/mentor/:MID", controller.DeleteMentor, middleware.ProtectedAdmin)
 	mentor.Post("/dashboard/material/add", controller.PostMaterial, middleware.MentorProtected)

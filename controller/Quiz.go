@@ -15,6 +15,7 @@ import (
 	"github.com/U-to-E/dashboard/models"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/session"
+	"gorm.io/gorm"
 )
 
 var store *session.Store
@@ -66,7 +67,6 @@ func QuizPage(c fiber.Ctx) error {
 	}
 
 	userID, ok := sess.Get("user_id").(uint)
-
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized. Please Login"})
 	}
@@ -88,7 +88,6 @@ func QuizPage(c fiber.Ctx) error {
 	err = database.DB.Table("marks").
 		Where("student_id = ? AND quiz_id = ?", SID, QID).
 		Count(&count).Error
-
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString("Database error")
 	}
@@ -109,8 +108,16 @@ func QuizPage(c fiber.Ctx) error {
 	}
 	dur := time.Duration(value) * time.Minute
 
-	if sess.Get("quiz") == nil {
-		quizzes, err := readCSV(quiz.Path)
+	var quizState models.QuizState
+	err = database.DB.Where("user_id = ? AND quiz_id = ?", userID, QID).First(&quizState).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return c.Status(fiber.StatusInternalServerError).SendString("Database error")
+	}
+
+	var quizzes []models.Question
+
+	if err == gorm.ErrRecordNotFound {
+		quizzes, err = readCSV(quiz.Path)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).SendString("Failed to read quizzes")
 		}
@@ -124,32 +131,23 @@ func QuizPage(c fiber.Ctx) error {
 			return c.Status(fiber.StatusInternalServerError).SendString("Failed to marshal quizzes")
 		}
 
-		sess.Set("quiz", string(quizzesJSON))
-		sess.Set("start_time", time.Now())
-		if err := sess.Save(); err != nil {
-			return c.Status(fiber.StatusInternalServerError).SendString("Failed to save session")
-		}
-	}
-
-	quizzesJSON := sess.Get("quiz")
-	var quizzes []models.Question
-	if quizzesJSON != nil {
-		quizzesStr, ok := quizzesJSON.(string)
-		if !ok {
-			return c.Status(fiber.StatusInternalServerError).SendString("Quiz data in session is not a string")
+		quizState = models.QuizState{
+			UserID:    userID,
+			QuizID:    QID,
+			Questions: string(quizzesJSON),
+			StartTime: time.Now(),
 		}
 
-		if err := json.Unmarshal([]byte(quizzesStr), &quizzes); err != nil {
+		if err := database.DB.Create(&quizState).Error; err != nil {
+			return c.Status(fiber.StatusInternalServerError).SendString("Failed to save quiz state")
+		}
+	} else {
+		if err := json.Unmarshal([]byte(quizState.Questions), &quizzes); err != nil {
 			return c.Status(fiber.StatusInternalServerError).SendString("Failed to unmarshal quizzes")
 		}
 	}
 
-	startTimeInterface := sess.Get("start_time")
-	startTime, ok := startTimeInterface.(time.Time)
-	if !ok {
-		return c.Status(fiber.StatusInternalServerError).SendString("Invalid start time in session")
-	}
-	remainingTime := dur - time.Since(startTime)
+	remainingTime := dur - time.Since(quizState.StartTime)
 	if remainingTime < 0 {
 		remainingTime = 0
 	}

@@ -219,15 +219,31 @@
 
                 <div class="progress">
                   <div
+                    id="{{ .ID }}"
                     class="progress-bar"
                     role="progressbar"
-                    style="width: {{ .Level }}"
-                    aria-valuenow="{{ .Level }}"
+                    aria-valuenow="0"
                     aria-valuemin="0"
                     aria-valuemax="100"
                   >
-                    {{ .Level }}
+                    0%
                   </div>
+                  <script>
+                    const progressBar = document.getElementById("{{ .ID }}")
+
+                    function updateProgressBar(currentLevel) {
+                      const totalLevels = 5
+                      const valueInPercent = Math.floor(
+                        (currentLevel / totalLevels) * 100
+                      )
+
+                      progressBar.style.width = `${valueInPercent}%`
+                      progressBar.setAttribute('aria-valuenow', valueInPercent)
+                      progressBar.textContent = `${valueInPercent}%`
+                    }
+
+                    updateProgressBar({{ .Level }})
+                  </script>
                 </div>
               </a>
             </div>

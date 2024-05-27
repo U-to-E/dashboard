@@ -85,7 +85,9 @@ func AddStudent(c fiber.Ctx) error {
 		if !database.DB.Migrator().HasTable(record[3]) {
 			err := database.DB.Table(record[3]).Migrator().CreateTable(&models.Student{})
 			if err != nil {
-				panic("failed to create table")
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": "Error creating student record. Contact Admin",
+				})
 			}
 		}
 
@@ -239,8 +241,15 @@ func AddSingleStudent(c fiber.Ctx) error {
 		Marks:     0,
 	}
 
+	val, err := strconv.Atoi(mentorID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Mentor not assigned to this collage",
+		})
+	}
+
 	var mentor models.Mentor
-	if err := database.DB.Table("mentors").Where("id = ? AND collage_id = ?", mentorID, cID).First(&mentor).Error; err != nil {
+	if err := database.DB.Table("mentors").Where("id = ? AND collage_id = ?", uint(val), cID).First(&mentor).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Mentor not assigned to this collage",
 		})
@@ -267,8 +276,8 @@ func AddSingleStudent(c fiber.Ctx) error {
 		})
 	}
 
-	materialsDir := "./materials/" + cID
-	quizDir := "./quiz/" + cID
+	materialsDir := "./materials/" + cID + "-" + mentorID
+	quizDir := "./quiz/" + cID + "-" + mentorID
 
 	if err := os.MkdirAll(materialsDir, 0755); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -370,8 +379,48 @@ func MapMentorToCollage(c fiber.Ctx) error {
 	mentorID := c.FormValue("mentorID")
 	collageID := c.FormValue("collageId")
 
-	if err := database.DB.Table("mentors").Where("id = ?", mentorID).Update("CID", collageID).Error; err != nil {
+	var oldCollageID string
+
+	if err := database.DB.Table("mentors").Select("collage_id").Where("id = ?", mentorID).Scan(&oldCollageID).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error retrieving current collage assignment",
+		})
+	}
+
+	if err := database.DB.Table("mentors").Where("id = ?", mentorID).Update("collage_id", collageID).Error; err != nil {
 		return err
+	}
+
+	if oldCollageID != "0" {
+		oldMaterialsDir := "./materials/" + oldCollageID + "-" + mentorID
+		oldQuizDir := "./quiz/" + oldCollageID + "-" + mentorID
+
+		if err := os.RemoveAll(oldMaterialsDir); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Error deleting old materials directory",
+			})
+		}
+
+		if err := os.RemoveAll(oldQuizDir); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Error deleting old quiz directory",
+			})
+		}
+	}
+
+	materialsDir := "./materials/" + collageID + "-" + mentorID
+	quizDir := "./quiz/" + collageID + "-" + mentorID
+
+	if err := os.MkdirAll(materialsDir, 0755); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error creating materials directory",
+		})
+	}
+
+	if err := os.MkdirAll(quizDir, 0755); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Error creating quiz directory",
+		})
 	}
 
 	return c.SendString("Updated")
@@ -479,4 +528,32 @@ func DeleteMentor(c fiber.Ctx) error {
 	}
 
 	return c.SendString("Mentor deleted successfully")
+}
+
+func CreateCollageID(c fiber.Ctx) error {
+	collageID := c.FormValue("collageID")
+
+	if collageID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "collageID is required",
+		})
+	}
+
+	if collageID[0] != 'U' {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "ID must start with a capital U",
+		})
+	}
+
+	if database.DB.Migrator().HasTable(collageID) {
+		return c.SendString("Collage already exists")
+	}
+
+	if err := database.DB.Table(collageID).Migrator().CreateTable(&models.Student{}); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to create collage table",
+		})
+	}
+
+	return c.SendString("Created CollageID " + collageID)
 }
