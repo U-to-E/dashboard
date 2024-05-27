@@ -32,18 +32,16 @@
         <td data-hx-target="this" data-hx-swap="outerHTML">{{ .Marks }}</td>
         <td>
           <button
-            data-hx-target="#edit-form"
-            data-hx-swap="beforeend"
+            data-hx-swap="outerHTML"
             data-hx-trigger="click"
-            data-hx-get="/edit-student/{{ .ID }}"
-            data-hx-indicator=".htmx-indicator"
+            data-hx-get="/admin/panel/edit-student/{{ .CollageID }}-{{ .ID }}"
           >
             Edit
           </button>
         </td>
         <td>
           <button
-            hx-delete="/delete-student/{{ .ID }}"
+            hx-delete="/admin/panel/delete-student/{{ .CollageID }}-{{ .ID }}"
             hx-confirm="Are you sure you want to delete this student?"
           >
             Delete

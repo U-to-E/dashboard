@@ -50,6 +50,10 @@
    SECRET=your_secret
    ADMIN_EMAIL=hi@utoe.com
    ADMIN_PASS=your_admin_password
+   EMAIL_ADDR=email
+   EMAIL_PASS=pass
+   EMAIL_SMTP=smtp.gmail.com
+   EMAIL_PORT=587
    ```
 
 ### Running the Application

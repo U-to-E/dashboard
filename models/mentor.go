@@ -7,5 +7,5 @@ type Mentor struct {
 	Name            string `gorm:"column:name;not null"`
 	PhoneNumber     string `gorm:"column:phnumber;not null"`
 	Email           string `gorm:"column:email;not null"`
-	AssignedCollage string `gorm:"column:CID;not null"`
+	AssignedCollage string `gorm:"column:CID;"`
 }

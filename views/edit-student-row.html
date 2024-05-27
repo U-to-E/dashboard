@@ -1,0 +1,52 @@
+<form
+  hx-post="/admin/panel/update-student"
+  hx-target="this"
+  hx-swap="outerHTML"
+>
+  <input type="hidden" name="student_id" value="{{ .Student.ID }}" />
+
+  <td>{{ .ID }}</td>
+  <td>
+    Name
+    <input type="text" name="name" value="{{ .Student.Name }}" required />
+  </td>
+  <td>
+    Email
+    <input
+      disabled
+      type="email"
+      name="email"
+      value="{{ .Student.Email }}"
+      required
+    />
+  </td>
+  <td>
+    CollageID
+    <input
+      hidden
+      type="text"
+      name="college_id"
+      value="{{ .Student.CollageID }}"
+    />
+  </td>
+  <td>
+    MentorID
+    <input
+      type="text"
+      name="mentor_id"
+      value="{{ .Student.MentorID }}"
+      required
+    />
+  </td>
+  <td>
+    Level
+    <input type="text" name="level" value="{{ .Student.Level }}" required />
+  </td>
+  <td>
+    Total Marks
+    <input type="number" name="marks" value="{{ .Student.Marks }}" required />
+  </td>
+  <td>
+    <button type="submit">Save</button>
+  </td>
+</form>

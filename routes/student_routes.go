@@ -18,6 +18,10 @@ func SetupStudentRoutes(app *fiber.App) {
 	app.Get("/reset/password", controller.RenderResetPass)
 	admin.Get("/panel", controller.RenderAdmin, middleware.ProtectedAdmin)
 	admin.Get("/panel/collage/:id", controller.GetStudentList, middleware.ProtectedAdmin)
+	admin.Get("/panel/mentors", controller.GetMentorList, middleware.ProtectedAdmin)
+
+	admin.Get("/panel/edit-student/:CID-:SID", controller.EditStudent, middleware.ProtectedAdmin)
+
 	student.Get("/dashboard", controller.RenderDashboard, middleware.Protected)
 	student.Get("/dashboard/quiz", controller.QuizPage, middleware.Protected)
 	student.Get("/dashboard/marks", controller.RenderMarks, middleware.Protected)
@@ -39,6 +43,9 @@ func SetupStudentRoutes(app *fiber.App) {
 	admin.Post("/panel/password/gen", controller.PasswordGenrator, middleware.ProtectedAdmin)
 	admin.Post("/panel/collage/id", controller.PostCID, middleware.ProtectedAdmin)
 	admin.Post("/panel/mentormapping", controller.MapMentorToCollage, middleware.ProtectedAdmin)
+	admin.Post("/panel/update-student", controller.UpdateStudent, middleware.ProtectedAdmin)
+	admin.Delete("/panel/delete-student/:CID-:SID", controller.DeleteStudent, middleware.ProtectedAdmin)
+	admin.Delete("/panel/delete/mentor/:MID", controller.DeleteMentor, middleware.ProtectedAdmin)
 	mentor.Post("/dashboard/material/add", controller.PostMaterial, middleware.MentorProtected)
 	mentor.Post("/dashboard/material/delete", controller.DeleteMaterial, middleware.MentorProtected)
 	mentor.Post("/dashboard/quiz/add", controller.CreateQuiz, middleware.MentorProtected)

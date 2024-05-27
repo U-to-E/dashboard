@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/csv"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/U-to-E/dashboard/database"
@@ -158,8 +159,9 @@ func AddMentor(c fiber.Ctx) error {
 		}
 
 		mentor := models.Mentor{
-			Name:  record[0],
-			Email: record[1],
+			Name:        record[0],
+			Email:       record[1],
+			PhoneNumber: record[2],
 		}
 
 		if err := database.DB.Table("logins").Create(&login).Error; err != nil {
@@ -214,6 +216,12 @@ func AddSingleStudent(c fiber.Ctx) error {
 	cID := c.FormValue("collageID")
 	mentorID := c.FormValue("mentorID")
 
+	if name == "" || email == "" || pass == "" || cID == "" || mentorID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Missing required fields",
+		})
+	}
+
 	login := models.Login{
 		Name:      name,
 		Email:     email,
@@ -230,6 +238,7 @@ func AddSingleStudent(c fiber.Ctx) error {
 		Level:     1,
 		Marks:     0,
 	}
+
 	var mentor models.Mentor
 	if err := database.DB.Table("mentors").Where("id = ? AND collage_id = ?", mentorID, cID).First(&mentor).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -238,10 +247,18 @@ func AddSingleStudent(c fiber.Ctx) error {
 	}
 
 	if !database.DB.Migrator().HasTable(cID) {
-		err := database.DB.Table(cID).Migrator().CreateTable(&models.Student{})
-		if err != nil {
-			panic("failed to create table")
+		if err := database.DB.Table(cID).Migrator().CreateTable(&models.Student{}); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Failed to create collage table",
+			})
 		}
+	}
+
+	var existingStudent models.Student
+	if err := database.DB.Table(cID).Where("email = ?", email).First(&existingStudent).Error; err == nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Student with this email already exists",
+		})
 	}
 
 	if err := database.DB.Table(cID).Create(&student).Error; err != nil {
@@ -271,13 +288,20 @@ func AddSingleStudent(c fiber.Ctx) error {
 		})
 	}
 
-	return c.SendString("Student added successfully")
+	return c.Status(fiber.StatusOK).SendString("Student added successfully")
 }
+
 func AddSingleMentor(c fiber.Ctx) error {
 	name := c.FormValue("name")
 	email := c.FormValue("email")
 	pass := c.FormValue("password")
 	phone := c.FormValue("phnumber")
+
+	if name == "" || email == "" || pass == "" || phone == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Missing required fields",
+		})
+	}
 
 	login := models.Login{
 		Name:     name,
@@ -304,7 +328,7 @@ func AddSingleMentor(c fiber.Ctx) error {
 			"error": "Error creating mentor record",
 		})
 	}
-	return c.SendString("Mentors added successfully")
+	return c.SendString("Mentor added successfully")
 
 }
 
@@ -327,6 +351,21 @@ func GetStudentList(c fiber.Ctx) error {
 	})
 }
 
+func GetMentorList(c fiber.Ctx) error {
+	var mentors []models.Mentor
+
+	c.Set("HX-Redirect", "/admin/panel/mentors")
+
+	err := database.DB.Table("mentors").Find(&mentors).Error
+	if err != nil {
+		return c.SendString("Issue with DB")
+	}
+
+	return c.Render("mentortable", fiber.Map{
+		"Mentors": mentors,
+	})
+}
+
 func MapMentorToCollage(c fiber.Ctx) error {
 	mentorID := c.FormValue("mentorID")
 	collageID := c.FormValue("collageId")
@@ -336,4 +375,108 @@ func MapMentorToCollage(c fiber.Ctx) error {
 	}
 
 	return c.SendString("Updated")
+}
+
+func DeleteStudent(c fiber.Ctx) error {
+	collegeID := c.Params("CID")
+	studentID := c.Params("SID")
+
+	val, err := strconv.Atoi(studentID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid student ID")
+	}
+
+	var student models.Student
+
+	if err := database.DB.Table(collegeID).Where("id = ?", val).Find(&student).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to delete student")
+	}
+
+	if err := database.DB.Table(collegeID).Where("id = ?", val).Delete(&models.Student{}).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to delete student")
+	}
+	if err := database.DB.Table("logins").Where("email = ?", student.Email).Delete(&models.Login{}).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to delete student")
+	}
+
+	return c.SendString("Student deleted successfully")
+}
+
+func EditStudent(c fiber.Ctx) error {
+	collegeID := c.Params("CID")
+	studentID := c.Params("SID")
+
+	val, err := strconv.Atoi(studentID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid student ID")
+	}
+
+	var student models.Student
+
+	if err := database.DB.Table(collegeID).Where("id = ?", val).First(&student).Error; err != nil {
+		return err
+	}
+
+	return c.Render("edit-student-row", fiber.Map{
+		"Student": student,
+	})
+}
+
+func UpdateStudent(c fiber.Ctx) error {
+	idStr := c.FormValue("student_id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid student ID")
+	}
+	name := c.FormValue("name")
+	collegeID := c.FormValue("college_id")
+
+	mentorID := c.FormValue("mentor_id")
+
+	level, err := strconv.Atoi(c.FormValue("level"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid Level")
+	}
+	marks, err := strconv.Atoi(c.FormValue("marks"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid marks")
+	}
+
+	student := models.Student{
+		ID:       uint(id),
+		Name:     name,
+		MentorID: mentorID,
+		Level:    level,
+		Marks:    marks,
+	}
+
+	if err := database.DB.Table(collegeID).Where("id = ?", student.ID).Updates(&student).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return c.SendString("Updated")
+}
+
+func DeleteMentor(c fiber.Ctx) error {
+	mentorID := c.Params("MID")
+
+	val, err := strconv.Atoi(mentorID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid student ID")
+	}
+
+	var mentor models.Mentor
+
+	if err := database.DB.Table("mentors").Where("id = ?", val).Find(&mentor).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to delete student")
+	}
+
+	if err := database.DB.Table("mentors").Where("id = ?", val).Delete(&models.Mentor{}).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to delete student")
+	}
+	if err := database.DB.Table("logins").Where("email = ?", mentor.Email).Delete(&models.Login{}).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to delete student")
+	}
+
+	return c.SendString("Mentor deleted successfully")
 }

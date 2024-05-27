@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mentor List</title>
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
+  </head>
+  <body>
+    <h1>Mentor List</h1>
+
+    <table>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone Number</th>
+        <th>Assigned Collage</th>
+        <th>Edit</th>
+        <th>Delete</th>
+      </tr>
+      {{ range .Mentors }}
+      <tr>
+        <td>{{ .ID }}</td>
+        <td data-hx-target="this" data-hx-swap="outerHTML">{{ .Name }}</td>
+        <td data-hx-target="this" data-hx-swap="outerHTML">{{ .Email }}</td>
+        <td data-hx-target="this" data-hx-swap="outerHTML">
+          {{ .PhoneNumber }}
+        </td>
+        <td data-hx-target="this" data-hx-swap="outerHTML">
+          {{ .AssignedCollage }}
+        </td>
+        <td>
+          <button
+            data-hx-swap="outerHTML"
+            data-hx-trigger="click"
+            data-hx-get="/admin/panel/edit-mentor/{{ .ID }}"
+          >
+            Edit
+          </button>
+        </td>
+        <td>
+          <button
+            hx-delete="/admin/panel/delete/mentor/{{ .ID }}"
+            hx-confirm="Are you sure you want to delete this mentor?"
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+      {{ end }}
+    </table>
+
+    <button hx-post="/logout" hx-ext="redirectToResponseUrl">Log out</button>
+
+    <script src="https://unpkg.com/htmx.org/dist/htmx.js"></script>
+    <script>
+      htmx.defineExtension('redirectToResponseUrl', {
+        transformResponse: function (text, xhr) {
+          globalThis.document.location = xhr.responseURL
+          return 'Logging out...'
+        },
+      })
+    </script>
+  </body>
+</html>
